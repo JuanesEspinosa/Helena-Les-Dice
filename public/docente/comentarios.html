@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Comentarios · Helena les dice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .c-item { display: flex; flex-direction: column; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--line-soft); transition: background .12s; }
+    .c-item:first-child { border-top: 0; }
+    .c-item:hover { background: #FAFCFB; }
+    .c-item__head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center; }
+    .c-item__body { line-height: 1.55; font-size: 15px; }
+    .c-item__quote { padding-left: 10px; border-left: 3px solid var(--line); color: var(--text-2); }
+    .pill-atendido { background: var(--st-ok-bg); color: var(--st-ok); }
+    .pill-pendiente { background: var(--st-back-bg); color: var(--st-back); }
+    @media (max-width: 640px) { .c-item { padding: 14px 16px; } }
+  </style>
+</head>
+<body>
+  <div class="app-body"><main id="main" class="main"><div class="page-loading"><span class="spinner" aria-label="Cargando"></span></div></main></div>
+  <script type="module" src="/js/pages/docente-comentarios.js"></script>
+</body>
+</html>

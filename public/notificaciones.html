@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notificaciones · Helena les dice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    /* Vista 10: lista de avisos */
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; text-decoration: none; min-height: 32px; }
+    .back-link:hover { text-decoration: underline; }
+    .notif-page { width: 100%; max-width: 880px; display: flex; flex-direction: column; gap: 20px; }
+    .notif-group { display: flex; flex-direction: column; gap: 10px; }
+    .notif-group__title { margin-top: 8px; font-size: 13px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em; }
+    .notif { display: flex; align-items: flex-start; gap: 14px; width: 100%; padding: 16px 18px; border-radius: var(--radius); border: 1px solid var(--line); background: transparent; color: var(--text); text-align: left; text-decoration: none; cursor: pointer; transition: background 0.15s, border-color 0.15s, box-shadow 0.15s; }
+    .notif:hover { background: var(--surface); border-color: #B9C4BF; color: var(--text); }
+    .notif--unread { background: var(--surface); border-color: #B9C4BF; box-shadow: 0 2px 8px rgba(27, 36, 32, 0.06); }
+    .notif__icon { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+    .notif__icon--devuelta, .notif__icon--comentario { background: var(--st-back-bg); color: var(--st-back); }
+    .notif__icon--aprobada { background: var(--st-ok-bg); color: var(--st-ok); }
+    .notif__icon--nivel { background: var(--green-soft); color: var(--green-dark); }
+    .notif__icon--insignia { background: var(--gold-bg); color: #8A5A00; }
+    .notif__icon--revision { background: var(--st-review-bg); color: var(--st-review); }
+    .notif__text { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .notif__title { font-weight: 700; font-size: 15px; }
+    .notif__body { line-height: 1.5; color: #3E4A45; overflow-wrap: anywhere; }
+    .notif__when { font-size: 13px; color: var(--text-2); }
+    .notif__dot { width: 10px; height: 10px; border-radius: 50%; background: var(--warn); flex: none; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="app-body"><main id="main" class="main"><div class="page-loading"><span class="spinner" aria-label="Cargando"></span></div></main></div>
+  <script type="module" src="/js/pages/notificaciones.js"></script>
+</body>
+</html>

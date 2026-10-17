@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Detalle de equipo · Helena les dice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .lv-row { display: grid; grid-template-columns: minmax(140px, 240px) minmax(0, 1fr) 110px; align-items: center; gap: 16px; }
+    .lv-row .progress { height: 12px; }
+    .lv-row__cap { text-align: right; color: #3E4A45; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .lv-row--locked { color: var(--text-2); }
+    .log-item { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-top: 1px solid #F0F3F1; }
+    .log-item:first-child { border-top: 0; }
+    .log-item__when { color: var(--text-2); white-space: nowrap; }
+    .log-scroll { max-height: 520px; overflow-y: auto; }
+    .review-card { border: 2px solid #9BB8EA; }
+    .excerpt { padding: 12px 14px; border-radius: 12px; background: var(--surface-2); border-left: 3px solid #9BB8EA; line-height: 1.6; max-height: 220px; overflow-y: auto; }
+    .review-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .review-actions .btn { flex: 1 1 140px; }
+    .btn-return { border-color: var(--warn); color: var(--st-back); background: var(--surface); }
+    .btn-return:hover:not(:disabled) { background: var(--warn-bg); color: var(--st-back); }
+    .part-cell { display: flex; align-items: center; gap: 10px; min-width: 140px; }
+    .part-cell .progress { flex: 1; }
+    .part-cell span:last-child { width: 40px; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .low { color: var(--warn); }
+    @media (max-width: 640px) {
+      .lv-row { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
+      .lv-row .progress { grid-column: 1 / -1; grid-row: 2; }
+      .log-item { flex-direction: column; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-body"><main id="main" class="main"><div class="page-loading"><span class="spinner" aria-label="Cargando"></span></div></main></div>
+  <script type="module" src="/js/pages/docente-equipo.js"></script>
+</body>
+</html>

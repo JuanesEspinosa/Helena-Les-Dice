@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Configurar niveles · Helena les dice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .sortable { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .lv-item { display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: 12px; border: 2px solid transparent; background: var(--surface); transition: background .15s, border-color .15s; }
+    .lv-item:hover { background: var(--surface-2); }
+    .lv-item[aria-current='true'] { background: var(--green-soft); border-color: var(--green); }
+    .lv-item__select { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 4px 6px; border: 0; border-radius: 10px; background: transparent; text-align: left; cursor: pointer; }
+    .lv-num { width: 32px; height: 32px; border-radius: 8px; background: var(--green); color: #fff; font-weight: 800; display: grid; place-items: center; flex: none; }
+    .lv-item__text { min-width: 0; }
+    .lv-item__text strong { display: block; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .grip { flex: none; width: 28px; height: 36px; display: grid; place-items: center; color: var(--text-3); cursor: grab; border-radius: 8px; }
+    .grip:active { cursor: grabbing; }
+    .move-btns { display: flex; flex-direction: column; gap: 2px; }
+    .move-btns .btn { width: 32px; min-height: 26px; height: 26px; padding: 0; border: 0; background: transparent; }
+    .move-btns .btn:hover:not(:disabled) { background: rgba(0, 0, 0, .05); }
+    .dragging { opacity: .45; }
+    .drop-before { box-shadow: 0 -3px 0 var(--green); }
+    .drop-after { box-shadow: 0 3px 0 var(--green); }
+    .sec-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .sec-item__code { width: 34px; flex: none; font-weight: 700; color: var(--text-2); font-variant-numeric: tabular-nums; }
+    .sec-item .input { min-height: 40px; padding: 6px 10px; }
+    .sec-item__used { flex: none; }
+    .edit-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .edit-grid .span-2 { grid-column: span 2; }
+    .btn-add-soft { background: var(--green-soft); color: var(--green-dark); }
+    .btn-add-soft:hover:not(:disabled) { background: #D3EBDD; color: var(--green-deep); }
+    @media (max-width: 640px) {
+      .edit-grid { grid-template-columns: minmax(0, 1fr); }
+      .edit-grid .span-2 { grid-column: auto; }
+      .sec-item__used { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-body"><main id="main" class="main"><div class="page-loading"><span class="spinner" aria-label="Cargando"></span></div></main></div>
+  <script type="module" src="/js/pages/docente-niveles.js"></script>
+</body>
+</html>

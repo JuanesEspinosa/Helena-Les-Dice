@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi perfil · Helena les dice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    /* Vista 09: lista de datos de la cuenta */
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; text-decoration: none; min-height: 32px; }
+    .back-link:hover { text-decoration: underline; }
+    .profile-head { display: flex; align-items: center; gap: 16px; min-width: 0; }
+    .profile-head .avatar { width: 72px; height: 72px; font-size: 26px; flex: none; }
+    .profile-email { color: var(--text-2); overflow-wrap: anywhere; }
+    .kv { margin: 0; display: grid; grid-template-columns: 150px minmax(0, 1fr); row-gap: 14px; column-gap: 16px; }
+    .kv dt { color: var(--text-2); font-weight: 600; }
+    .kv dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+    @media (max-width: 640px) { .kv { grid-template-columns: minmax(0, 1fr); row-gap: 2px; } .kv dd { margin-bottom: 10px; } }
+  </style>
+</head>
+<body>
+  <div class="app-body"><main id="main" class="main"><div class="page-loading"><span class="spinner" aria-label="Cargando"></span></div></main></div>
+  <script type="module" src="/js/pages/perfil.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Usuarios · Helena les dice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .filters { justify-content: flex-start; }
+    .filters .field { min-width: 0; }
+    .tag.role-docente { background: var(--green-soft); border-color: transparent; color: var(--green-dark); }
+    .tag.role-administrador { background: var(--text); border-color: transparent; color: #fff; }
+    .table .actions .btn { margin-left: 4px; }
+    .note { flex-direction: row; flex-wrap: wrap; align-items: center; }
+  </style>
+</head>
+<body>
+  <div class="app-body"><main id="main" class="main"><div class="page-loading"><span class="spinner" aria-label="Cargando"></span></div></main></div>
+  <script type="module" src="/js/pages/admin-usuarios.js"></script>
+</body>
+</html>

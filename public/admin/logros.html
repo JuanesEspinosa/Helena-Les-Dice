@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catálogo de logros · Helena les dice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    [hidden] { display: none !important; }
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .ach { display: flex; align-items: center; gap: 14px; padding: 16px; transition: border-color .15s, box-shadow .15s; }
+    .ach:hover { border-color: var(--green); }
+    .ach--selected { border: 2px solid var(--green); padding: 15px; }
+    .ach .badge-icon { width: 48px; height: 48px; }
+    .ach__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .ach__name { font-weight: 800; }
+    .icon-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
+    .icon-opt { min-height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text-2); display: grid; place-items: center; cursor: pointer; transition: border-color .15s, background .15s, color .15s; }
+    .icon-opt:hover { border-color: var(--green); color: var(--green-dark); }
+    .icon-opt[aria-checked='true'] { border: 2px solid var(--green); background: var(--green-soft); color: var(--green-dark); }
+    label.btn:focus-within { outline: 3px solid var(--green); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <div class="app-body"><main id="main" class="main"><div class="page-loading"><span class="spinner" aria-label="Cargando"></span></div></main></div>
+  <script type="module" src="/js/pages/admin-logros.js"></script>
+</body>
+</html>
