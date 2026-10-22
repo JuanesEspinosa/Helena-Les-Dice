@@ -37,6 +37,18 @@ Abre http://localhost:3000
 
 > ⚠️ `npm run db:reset` borra y recrea todas las tablas de la aplicación. Úsalo solo sobre la base `helena`.
 
+## Tests
+
+```bash
+npm test
+```
+
+Prueban la API de punta a punta (login y bloqueo, permisos por rol, flujo de una sección con autoguardado, envío, devolución y aprobación, comentarios, administración de usuarios y reordenar niveles). Usan `node:test`, sin dependencias extra (requieren Node 21 o superior).
+
+Corren contra una base aparte, `helena_test`, que se crea sola si no existe y se **borra y recrea en cada corrida**; tu base `helena` no se toca. Para usar otra base define `TEST_DATABASE_URL`.
+
+No cubren los gestos del navegador (arrastrar con el mouse, el temporizador de 2 minutos): sí cubren los endpoints que esos gestos llaman.
+
 ## Cuentas de ejemplo
 
 Todas usan la contraseña **`Helena2026`**.
