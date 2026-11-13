@@ -70,8 +70,8 @@ export async function initLayout({ roles, active } = {}) {
   header.innerHTML = html`
     <button class="btn btn-icon btn-ghost menu-toggle" type="button" aria-label="${t.menu}" aria-expanded="false" aria-controls="sidebar">${icon('menu')}</button>
     <a class="brand" href="${me.home}">
-      <span class="logo" aria-hidden="true">LOGO</span>
-      <span style="min-width:0"><span class="brand-name" style="display:block">Helena les dice</span><span class="brand-sub" style="display:block">${subtitle}</span></span>
+      <img class="logo" src="/img/logo-sm.png" alt="Helena les dice" width="95" height="52">
+      <span style="min-width:0"><span class="brand-sub" style="display:block">${subtitle}</span></span>
     </a>
     <div class="header-actions">
       <button class="btn btn-outline btn-sm hide-sm" type="button" id="lang-btn" aria-label="${t.lang}" style="min-height:44px">${icon('globe', 18)}${lang.toUpperCase()}</button>
@@ -90,7 +90,7 @@ export async function initLayout({ roles, active } = {}) {
   nav.id = 'sidebar';
   nav.setAttribute('aria-label', 'Menú principal');
   nav.innerHTML = MENUS[user.role].map((m) => html`
-    <a class="nav-link" href="${m.href}" ${m.key === active ? 'aria-current="page"' : ''}>${icon(m.icon)}${m[lang]}</a>`).join('')
+    <a class="nav-link" href="${m.href}" aria-current="${m.key === active ? 'page' : 'false'}">${icon(m.icon)}${m[lang]}</a>`).join('')
     + (summary && summary.team ? html`
     <div class="card" style="margin-top:24px;padding:16px;display:flex;flex-direction:column;gap:10px">
       <div class="eyebrow" style="color:var(--text-2)">${t.progress}</div>
