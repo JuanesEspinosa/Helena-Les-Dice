@@ -22,7 +22,8 @@ CREATE TABLE users (
   role                  user_role    NOT NULL,
   active                BOOLEAN      NOT NULL DEFAULT TRUE,
   must_change_password  BOOLEAN      NOT NULL DEFAULT FALSE,
-  lang                  VARCHAR(2)   NOT NULL DEFAULT 'es',
+  lang                  VARCHAR(2)   NOT NULL DEFAULT 'es'
+                        CONSTRAINT users_lang_check CHECK (lang IN ('es', 'en', 'pt', 'fr', 'de', 'it')),
   failed_attempts       INT          NOT NULL DEFAULT 0,
   locked_until          TIMESTAMPTZ,
   last_login            TIMESTAMPTZ,
@@ -156,6 +157,8 @@ CREATE TABLE notifications (
   title       VARCHAR(200) NOT NULL,
   body        TEXT         NOT NULL DEFAULT '',
   link        VARCHAR(200) NOT NULL DEFAULT '',
+  msg_key     VARCHAR(60),                       -- clave del aviso traducido en el front (notif.<msg_key>)
+  params      JSONB        NOT NULL DEFAULT '{}', -- datos variables del aviso
   read        BOOLEAN      NOT NULL DEFAULT FALSE,
   created_at  TIMESTAMPTZ  NOT NULL DEFAULT now()
 );

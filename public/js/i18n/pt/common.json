@@ -1,0 +1,165 @@
+{
+  "common": {
+    "subject": "Gestão de projetos de TI",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "loading": "Carregando",
+    "section": "Seção",
+    "responsible": "Responsável",
+    "reviewer": "Revisor",
+    "status": "Status",
+    "action": "Ação",
+    "unassigned": "Não atribuído",
+    "open": "Abrir",
+    "openNamed": "Abrir {name}",
+    "seeAll": "Ver todas",
+    "retry": "Tentar novamente",
+    "back": "Voltar",
+    "breadcrumb": "Caminho",
+    "comments": "Comentários",
+    "reply": "Responder",
+    "noChanges": "Não havia alterações para salvar.",
+    "levelN": "Nível {n}",
+    "levelNamed": "Nível {n} · {name}",
+    "plusPoints": {
+      "one": "+{count} ponto",
+      "other": "+{count} pontos"
+    },
+    "actions": "Ações",
+    "edit": "Editar",
+    "saveChanges": "Salvar alterações",
+    "delete": "Excluir",
+    "save": "Salvar",
+    "saved": "As alterações foram salvas.",
+    "cannotUndo": "Esta ação não pode ser desfeita.",
+    "understood": "Entendi"
+  },
+  "lang": {
+    "label": "Idioma"
+  },
+  "status": {
+    "redaccion": "Em redação",
+    "revision": "Em revisão",
+    "aprobado": "Aprovado",
+    "devuelto": "Devolvido"
+  },
+  "time": {
+    "never": "Sem atividade",
+    "justNow": "Agora mesmo",
+    "todayAt": "Hoje, {time}",
+    "yesterdayAt": "Ontem, {time}"
+  },
+  "roles": {
+    "estudiante": "Estudante",
+    "docente": "Professor",
+    "administrador": "Administrador"
+  },
+  "menu": {
+    "estudiante": {
+      "tablero": "Quadro de níveis",
+      "integrantes": "Membros",
+      "logros": "Conquistas e insígnias",
+      "historial": "Histórico de versões"
+    },
+    "docente": {
+      "panel": "Painel de acompanhamento",
+      "equipos": "Equipes",
+      "niveles": "Configurar níveis",
+      "comentarios": "Comentários"
+    },
+    "administrador": {
+      "panel": "Painel",
+      "usuarios": "Usuários",
+      "periodos": "Períodos letivos",
+      "logros": "Catálogo de conquistas",
+      "backups": "Backups"
+    }
+  },
+  "layout": {
+    "subtitle": "{subject} · {detail}",
+    "noTeam": "Sem equipe",
+    "teacherPanel": "Painel do professor",
+    "adminSubtitle": "Administração da plataforma",
+    "openMenu": "Abrir menu",
+    "mainMenu": "Menu principal",
+    "notifications": "Notificações",
+    "notificationsUnread": {
+      "one": "Notificações, {count} não lida",
+      "other": "Notificações, {count} não lidas"
+    },
+    "myProfile": "Meu perfil",
+    "logout": "Sair",
+    "progress": "Progresso do documento",
+    "approvedOf": {
+      "one": "{approved} de {count} seção aprovada",
+      "other": "{approved} de {count} seções aprovadas"
+    }
+  },
+  "titles": {
+    "studentBoard": "Quadro de níveis · Helena les dice",
+    "studentMembers": "Membros · Helena les dice",
+    "studentAchievements": "Conquistas e insígnias · Helena les dice",
+    "studentHistory": "Histórico de versões · Helena les dice",
+    "editor": "Editor de seção · Helena les dice",
+    "teacherPanel": "Painel de acompanhamento · Helena les dice",
+    "teacherTeams": "Equipes · Helena les dice",
+    "teacherTeam": "Detalhes da equipe · Helena les dice",
+    "teacherLevels": "Configurar níveis · Helena les dice",
+    "teacherComments": "Comentários · Helena les dice",
+    "adminPanel": "Painel do administrador · Helena les dice",
+    "adminUsers": "Usuários · Helena les dice",
+    "adminPeriods": "Períodos letivos · Helena les dice",
+    "adminAchievements": "Catálogo de conquistas · Helena les dice",
+    "adminBackups": "Backups · Helena les dice",
+    "profile": "Meu perfil · Helena les dice",
+    "notifications": "Notificações · Helena les dice"
+  },
+  "account": {
+    "backToBoard": "Voltar ao quadro",
+    "backToPanel": "Voltar ao painel",
+    "profile": {
+      "firstTitle": "Você precisa trocar sua senha temporária.",
+      "firstText": "Por segurança, crie sua própria senha antes de continuar usando a plataforma.",
+      "noTeam": "Nenhuma equipe atribuída",
+      "memberSince": "Membro desde",
+      "lastLogin": "Último acesso",
+      "language": "Idioma da interface",
+      "contactAdmin": "Para alterar seu nome ou e-mail, entre em contato com o administrador.",
+      "changePassword": "Alterar senha",
+      "passwordHint": "Mínimo de 8 caracteres, com pelo menos um número.",
+      "confirmNew": "Confirmar nova senha",
+      "updatePassword": "Atualizar senha",
+      "session": "Sessão",
+      "sessionText": "Sua sessão é encerrada automaticamente após 30 minutos sem atividade.",
+      "passwordUpdated": "Sua senha foi atualizada com sucesso.",
+      "firstDone": "Pronto, agora a senha é só sua.",
+      "continueHome": "Ir para a página inicial"
+    },
+    "notifications": {
+      "types": {
+        "devuelta": "Seção devolvida",
+        "comentario": "Novo comentário",
+        "aprobada": "Seção aprovada",
+        "nivel": "Nível desbloqueado",
+        "insignia": "Insígnia conquistada",
+        "revision": "Seção em revisão",
+        "other": "Aviso"
+      },
+      "today": "Hoje",
+      "thisWeek": "Esta semana",
+      "earlier": "Anteriores",
+      "unreadOne": "Não lida",
+      "upToDate": "Você está em dia",
+      "noUnread": "Você não tem avisos não lidos.",
+      "emptyTitle": "Você ainda não tem notificações",
+      "emptyText": "Aqui você verá as revisões, os comentários e as conquistas da sua equipe.",
+      "all": "Todas",
+      "unread": "Não lidas",
+      "unreadCount": "Não lidas ({count})",
+      "allRead": "Você marcou todos os avisos como lidos.",
+      "noneToRead": "Você não tinha avisos não lidos.",
+      "markAll": "Marcar todas como lidas",
+      "filter": "Filtrar notificações"
+    }
+  }
+}

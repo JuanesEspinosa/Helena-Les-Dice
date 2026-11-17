@@ -1,0 +1,165 @@
+{
+  "common": {
+    "subject": "IT-Projektmanagement",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen",
+    "loading": "Wird geladen",
+    "section": "Abschnitt",
+    "responsible": "Verantwortlich",
+    "reviewer": "Prüfer",
+    "status": "Status",
+    "action": "Aktion",
+    "unassigned": "Nicht zugewiesen",
+    "open": "Öffnen",
+    "openNamed": "{name} öffnen",
+    "seeAll": "Alle anzeigen",
+    "retry": "Erneut versuchen",
+    "back": "Zurück",
+    "breadcrumb": "Pfad",
+    "comments": "Kommentare",
+    "reply": "Antworten",
+    "noChanges": "Es gab keine Änderungen zu speichern.",
+    "levelN": "Level {n}",
+    "levelNamed": "Level {n} · {name}",
+    "plusPoints": {
+      "one": "+{count} Punkt",
+      "other": "+{count} Punkte"
+    },
+    "actions": "Aktionen",
+    "edit": "Bearbeiten",
+    "saveChanges": "Änderungen speichern",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "saved": "Die Änderungen wurden gespeichert.",
+    "cannotUndo": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "understood": "Verstanden"
+  },
+  "lang": {
+    "label": "Sprache"
+  },
+  "status": {
+    "redaccion": "In Bearbeitung",
+    "revision": "In Prüfung",
+    "aprobado": "Freigegeben",
+    "devuelto": "Zurückgegeben"
+  },
+  "time": {
+    "never": "Keine Aktivität",
+    "justNow": "Gerade eben",
+    "todayAt": "Heute, {time}",
+    "yesterdayAt": "Gestern, {time}"
+  },
+  "roles": {
+    "estudiante": "Studierende/r",
+    "docente": "Lehrkraft",
+    "administrador": "Administrator"
+  },
+  "menu": {
+    "estudiante": {
+      "tablero": "Level-Übersicht",
+      "integrantes": "Teammitglieder",
+      "logros": "Erfolge und Abzeichen",
+      "historial": "Versionsverlauf"
+    },
+    "docente": {
+      "panel": "Fortschrittsübersicht",
+      "equipos": "Teams",
+      "niveles": "Level konfigurieren",
+      "comentarios": "Kommentare"
+    },
+    "administrador": {
+      "panel": "Übersicht",
+      "usuarios": "Benutzer",
+      "periodos": "Studienperioden",
+      "logros": "Erfolgskatalog",
+      "backups": "Sicherungen"
+    }
+  },
+  "layout": {
+    "subtitle": "{subject} · {detail}",
+    "noTeam": "Kein Team",
+    "teacherPanel": "Bereich für Lehrkräfte",
+    "adminSubtitle": "Plattformverwaltung",
+    "openMenu": "Menü öffnen",
+    "mainMenu": "Hauptmenü",
+    "notifications": "Benachrichtigungen",
+    "notificationsUnread": {
+      "one": "Benachrichtigungen, {count} ungelesen",
+      "other": "Benachrichtigungen, {count} ungelesen"
+    },
+    "myProfile": "Mein Profil",
+    "logout": "Abmelden",
+    "progress": "Dokumentfortschritt",
+    "approvedOf": {
+      "one": "{approved} von {count} Abschnitt freigegeben",
+      "other": "{approved} von {count} Abschnitten freigegeben"
+    }
+  },
+  "titles": {
+    "studentBoard": "Level-Übersicht · Helena les dice",
+    "studentMembers": "Teammitglieder · Helena les dice",
+    "studentAchievements": "Erfolge und Abzeichen · Helena les dice",
+    "studentHistory": "Versionsverlauf · Helena les dice",
+    "editor": "Abschnittseditor · Helena les dice",
+    "teacherPanel": "Fortschrittsübersicht · Helena les dice",
+    "teacherTeams": "Teams · Helena les dice",
+    "teacherTeam": "Teamdetails · Helena les dice",
+    "teacherLevels": "Level konfigurieren · Helena les dice",
+    "teacherComments": "Kommentare · Helena les dice",
+    "adminPanel": "Administrationsübersicht · Helena les dice",
+    "adminUsers": "Benutzer · Helena les dice",
+    "adminPeriods": "Studienperioden · Helena les dice",
+    "adminAchievements": "Erfolgskatalog · Helena les dice",
+    "adminBackups": "Sicherungen · Helena les dice",
+    "profile": "Mein Profil · Helena les dice",
+    "notifications": "Benachrichtigungen · Helena les dice"
+  },
+  "account": {
+    "backToBoard": "Zurück zur Übersicht",
+    "backToPanel": "Zurück zur Übersicht",
+    "profile": {
+      "firstTitle": "Sie müssen Ihr temporäres Passwort ändern.",
+      "firstText": "Legen Sie aus Sicherheitsgründen ein eigenes Passwort fest, bevor Sie die Plattform weiter nutzen.",
+      "noTeam": "Keinem Team zugewiesen",
+      "memberSince": "Mitglied seit",
+      "lastLogin": "Letzte Anmeldung",
+      "language": "Sprache der Oberfläche",
+      "contactAdmin": "Wenden Sie sich an den Administrator, um Ihren Namen oder Ihre E-Mail-Adresse zu ändern.",
+      "changePassword": "Passwort ändern",
+      "passwordHint": "Mindestens 8 Zeichen, davon mindestens eine Ziffer.",
+      "confirmNew": "Neues Passwort bestätigen",
+      "updatePassword": "Passwort aktualisieren",
+      "session": "Sitzung",
+      "sessionText": "Ihre Sitzung endet automatisch nach 30 Minuten ohne Aktivität.",
+      "passwordUpdated": "Ihr Passwort wurde erfolgreich aktualisiert.",
+      "firstDone": "Fertig – Ihr Passwort ist jetzt persönlich.",
+      "continueHome": "Weiter zu meiner Startseite"
+    },
+    "notifications": {
+      "types": {
+        "devuelta": "Abschnitt zurückgegeben",
+        "comentario": "Neuer Kommentar",
+        "aprobada": "Abschnitt freigegeben",
+        "nivel": "Level freigeschaltet",
+        "insignia": "Abzeichen erhalten",
+        "revision": "Abschnitt in Prüfung",
+        "other": "Hinweis"
+      },
+      "today": "Heute",
+      "thisWeek": "Diese Woche",
+      "earlier": "Früher",
+      "unreadOne": "Ungelesen",
+      "upToDate": "Sie sind auf dem neuesten Stand",
+      "noUnread": "Sie haben keine ungelesenen Hinweise.",
+      "emptyTitle": "Sie haben noch keine Benachrichtigungen",
+      "emptyText": "Hier sehen Sie die Prüfungen, Kommentare und Erfolge Ihres Teams.",
+      "all": "Alle",
+      "unread": "Ungelesen",
+      "unreadCount": "Ungelesen ({count})",
+      "allRead": "Sie haben alle Hinweise als gelesen markiert.",
+      "noneToRead": "Sie hatten keine ungelesenen Hinweise.",
+      "markAll": "Alle als gelesen markieren",
+      "filter": "Benachrichtigungen filtern"
+    }
+  }
+}

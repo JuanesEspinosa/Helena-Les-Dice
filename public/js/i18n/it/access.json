@@ -1,0 +1,71 @@
+{
+  "access": {
+    "brand": {
+      "label": "Presentazione della piattaforma",
+      "lead": "Costruisci il documento del tuo progetto livello dopo livello, con ruoli chiari nel gruppo e riscontri puntuali dal tuo docente.",
+      "levelsLabel": "I cinque livelli del documento IEEE 830",
+      "level1": "Introduzione",
+      "level2": "Descrizione generale",
+      "level3": "Requisiti specifici",
+      "level4": "Progettazione",
+      "level5": "Allegati",
+      "benefit1Title": "Livelli a sprint",
+      "benefit1Text": "Un livello si sblocca quando viene approvato il precedente.",
+      "benefit2Title": "Il contributo di ogni membro",
+      "benefit2Text": "Ogni modifica resta nella cronologia.",
+      "benefit3Title": "Traguardi del gruppo",
+      "benefit3Text": "Punti e badge per ogni sezione approvata."
+    },
+    "privacy": "I tuoi dati sono trattati ai sensi della Legge 1581 del 2012 e delle politiche del POLI JIC.",
+    "emailLabel": "Email istituzionale",
+    "emailPlaceholder": "nome_cognome@elpoli.edu.co",
+    "emailRequired": "Inserisci la tua email istituzionale.",
+    "showPassword": "Mostra password",
+    "hidePassword": "Nascondi password",
+    "login": {
+      "pageTitle": "Accedi · Helena les dice",
+      "title": "Accedi",
+      "lead": "Entra con la tua email istituzionale.",
+      "password": "Password",
+      "forgot": "Hai dimenticato la password?",
+      "submit": "Accedi",
+      "idleNote": "Per sicurezza, la sessione si chiude automaticamente dopo 30 minuti di inattività.",
+      "passwordRequired": "Inserisci la password.",
+      "passwordReset": "La password è stata aggiornata. Ora puoi accedere.",
+      "loginToContinue": "Accedi per continuare.",
+      "attemptsLeft": {
+        "one": "Ti resta {count} tentativo prima del blocco di {minutes} minuti.",
+        "other": "Ti restano {count} tentativi prima del blocco di {minutes} minuti."
+      }
+    },
+    "recover": {
+      "pageTitle": "Recupera password · Helena les dice",
+      "back": "Torna all'accesso",
+      "step": "Passo {n} di {total}",
+      "title": "Hai dimenticato la password?",
+      "lead": "Inserisci la tua email istituzionale e ti invieremo un link per crearne una nuova.",
+      "send": "Invia link",
+      "sentTitle": "Controlla la tua email",
+      "sentText": "Se l'indirizzo è corretto, riceverai un link per reimpostare la password. Il link è valido per 1 ora.",
+      "sentSpam": "Non è arrivato? Controlla la cartella della posta indesiderata.",
+      "resend": "Invia di nuovo",
+      "otherEmail": "Usa un'altra email",
+      "resent": "Se l'indirizzo è corretto, ti abbiamo inviato un nuovo link.",
+      "invalidTitle": "Link non valido",
+      "restart": "Richiedi un nuovo link",
+      "newTitle": "Crea la tua nuova password",
+      "newPassword": "Nuova password",
+      "confirmPassword": "Conferma password",
+      "saveAndLogin": "Salva e accedi"
+    },
+    "rules": {
+      "label": "Requisiti della password",
+      "len": "Almeno 8 caratteri",
+      "num": "Contiene almeno un numero",
+      "same": "Le due password coincidono",
+      "met": "(soddisfatto)",
+      "pending": "(da soddisfare)",
+      "notMet": "La password non soddisfa ancora tutti i requisiti."
+    }
+  }
+}

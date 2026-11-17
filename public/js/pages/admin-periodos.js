@@ -1,7 +1,8 @@
 // Vista 16 · Periodos académicos (RF-17)
 import { get, post, put, del } from '../core/api.js';
-import { html, icon, safe, fmtDate, toast, clearErrors, showError, withBusy, confirmDialog, emptyState, loading } from '../core/ui.js';
+import { html, icon, safe, fmtDate, toast, clearErrors, showError, withBusy, confirmDialog, emptyState, loading, fmtNumber } from '../core/ui.js';
 import { initLayout, setMain } from '../core/layout.js';
+import { t } from '../core/i18n.js';
 
 let periods = [];
 let editing = null;
@@ -12,12 +13,12 @@ const fmtDay = (s) => fmtDate(`${s}T00:00:00`);
 await initLayout({ roles: ['administrador'], active: 'periodos' });
 const main = setMain(html`
   <div class="page-head"><div>
-    <h1 class="page-title">Periodos académicos</h1>
-    <p class="page-sub">Solo en los periodos activos el docente puede crear equipos.</p>
+    <h1 class="page-title">${t('menu.administrador.periodos')}</h1>
+    <p class="page-sub">${t('admin.periods.lead')}</p>
   </div></div>
   <div id="notice" aria-live="assertive"></div>
   <div class="split">
-    <section class="card grow" aria-label="Lista de periodos"><div id="list">${loading()}</div></section>
+    <section class="card grow" aria-label="${t('admin.periods.listLabel')}"><div id="list">${loading()}</div></section>
     <aside class="side"><form class="card card-pad stack" id="period-form" novalidate aria-labelledby="form-title"></form></aside>
   </div>`);
 
@@ -46,22 +47,22 @@ async function load() {
 function renderList() {
   const box = main.querySelector('#list');
   if (periods.length === 0) {
-    box.innerHTML = emptyState('calendar', 'Aún no hay periodos', 'Crea el primer semestre con el formulario para que los docentes puedan armar equipos.').value;
+    box.innerHTML = emptyState('calendar', t('admin.periods.emptyTitle'), t('admin.periods.emptyText')).value;
     return;
   }
   box.innerHTML = html`<div class="table-wrap"><table class="table">
-    <thead><tr><th scope="col">Periodo</th><th scope="col">Inicio</th><th scope="col">Fin</th>
-      <th scope="col" class="num">Equipos</th><th scope="col">Estado</th><th scope="col" class="actions">Acciones</th></tr></thead>
+    <thead><tr><th scope="col">${t('admin.periods.period')}</th><th scope="col">${t('admin.periods.start')}</th><th scope="col">${t('admin.periods.end')}</th>
+      <th scope="col" class="num">${t('menu.docente.equipos')}</th><th scope="col">${t('common.status')}</th><th scope="col" class="actions">${t('common.actions')}</th></tr></thead>
     <tbody>${periods.map((p) => safe(html`<tr>
       <td><strong>${p.name}</strong></td>
       <td>${fmtDay(p.start_date)}</td>
       <td>${fmtDay(p.end_date)}</td>
-      <td class="num">${p.teams}</td>
-      <td>${p.active ? safe('<span class="pill pill-activo">Activo</span>') : safe('<span class="pill pill-inactivo">Inactivo</span>')}</td>
+      <td class="num">${fmtNumber(p.teams)}</td>
+      <td>${p.active ? safe(html`<span class="pill pill-activo">${t('admin.active')}</span>`) : safe(html`<span class="pill pill-inactivo">${t('admin.inactiveM')}</span>`)}</td>
       <td class="actions">
-        <button type="button" class="btn btn-ghost btn-sm" data-act="edit" data-id="${p.id}">${icon('edit', 16)}Editar</button>
-        <button type="button" class="btn ${p.active ? 'btn-danger-outline' : 'btn-outline'} btn-sm" data-act="toggle" data-id="${p.id}">${p.active ? 'Inactivar' : 'Activar'}</button>
-        <button type="button" class="btn btn-ghost btn-sm btn-icon" data-act="delete" data-id="${p.id}" aria-label="Eliminar el periodo ${p.name}" title="Eliminar">${icon('trash', 16)}</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-act="edit" data-id="${p.id}">${icon('edit', 16)}${t('common.edit')}</button>
+        <button type="button" class="btn ${p.active ? 'btn-danger-outline' : 'btn-outline'} btn-sm" data-act="toggle" data-id="${p.id}">${t(p.active ? 'admin.periods.deactivate' : 'admin.periods.activate')}</button>
+        <button type="button" class="btn btn-ghost btn-sm btn-icon" data-act="delete" data-id="${p.id}" aria-label="${t('admin.periods.deleteNamed', { name: p.name })}" title="${t('common.delete')}">${icon('trash', 16)}</button>
       </td>
     </tr>`))}</tbody></table></div>`;
 }
@@ -78,12 +79,12 @@ async function onListClick(e) {
 
 async function toggle(btn, p) {
   const ok = await confirmDialog(p.active
-    ? { title: `¿Inactivar el periodo ${p.name}?`, message: 'Los docentes no podrán crear equipos nuevos en él. Los equipos y avances existentes se conservan.', confirmText: 'Inactivar', danger: true }
-    : { title: `¿Activar el periodo ${p.name}?`, message: 'Los docentes podrán crear equipos en este periodo.', confirmText: 'Activar' });
+    ? { title: t('admin.periods.deactivateTitle', { name: p.name }), message: t('admin.periods.deactivateText'), confirmText: t('admin.periods.deactivate'), danger: true }
+    : { title: t('admin.periods.activateTitle', { name: p.name }), message: t('admin.periods.activateText'), confirmText: t('admin.periods.activate') });
   if (!ok) return;
   try {
     await withBusy(btn, () => post(`/admin/periods/${p.id}/toggle`));
-    toast(p.active ? `El periodo ${p.name} quedó inactivo.` : `El periodo ${p.name} quedó activo.`);
+    toast(t(p.active ? 'admin.periods.deactivated' : 'admin.periods.activated', { name: p.name }));
     await load();
   } catch (err) {
     toast(err.message, 'error');
@@ -92,18 +93,18 @@ async function toggle(btn, p) {
 
 async function remove(btn, p) {
   notice.innerHTML = '';
-  const ok = await confirmDialog({ title: `¿Eliminar el periodo ${p.name}?`, message: 'Esta acción no se puede deshacer.', confirmText: 'Eliminar', danger: true });
+  const ok = await confirmDialog({ title: t('admin.periods.deleteTitle', { name: p.name }), message: t('common.cannotUndo'), confirmText: t('common.delete'), danger: true });
   if (!ok) return;
   try {
     await withBusy(btn, () => del(`/admin/periods/${p.id}`));
-    toast(`Se eliminó el periodo ${p.name}.`);
+    toast(t('admin.periods.deleted', { name: p.name }));
     if (editing && editing.id === p.id) cancelEdit();
     await load();
   } catch (err) {
     if (err.status !== 409) return toast(err.message, 'error');
     notice.innerHTML = html`<div class="alert alert-warn" role="alert">${icon('warning')}
       <div style="flex:1">${err.message}</div>
-      <button type="button" class="btn btn-outline btn-sm" data-dismiss>Entendido</button></div>`;
+      <button type="button" class="btn btn-outline btn-sm" data-dismiss>${t('common.understood')}</button></div>`;
     notice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }
@@ -113,20 +114,20 @@ async function remove(btn, p) {
 function renderForm() {
   const p = editing || { name: '', start_date: '', end_date: '', active: false };
   form.innerHTML = html`
-    <h2 class="card-title" id="form-title" style="font-size:18px">${editing ? `Editar periodo ${p.name}` : 'Nuevo periodo'}</h2>
+    <h2 class="card-title" id="form-title" style="font-size:18px">${editing ? t('admin.periods.editTitle', { name: p.name }) : t('admin.panel.quick.periodTitle')}</h2>
     <div class="form-alert"></div>
-    <div class="field"><label class="label" for="p-nombre">Nombre del periodo</label>
+    <div class="field"><label class="label" for="p-nombre">${t('fields.periodName')}</label>
       <input class="input" id="p-nombre" name="name" type="text" maxlength="20" placeholder="2027-1" required autocomplete="off" value="${p.name}"></div>
     <div class="grid grid-2" style="gap:12px">
-      <div class="field"><label class="label" for="p-ini">Fecha de inicio</label>
+      <div class="field"><label class="label" for="p-ini">${t('fields.start_date')}</label>
         <input class="input" id="p-ini" name="start_date" type="date" required value="${p.start_date}"></div>
-      <div class="field"><label class="label" for="p-fin">Fecha de fin</label>
+      <div class="field"><label class="label" for="p-fin">${t('fields.end_date')}</label>
         <input class="input" id="p-fin" name="end_date" type="date" required value="${p.end_date}"></div>
     </div>
-    <label class="check"><input type="checkbox" name="active" ${p.active ? 'checked' : ''}>${editing ? 'Periodo activo' : 'Activar al crear'}</label>
+    <label class="check"><input type="checkbox" name="active" ${p.active ? 'checked' : ''}>${t(editing ? 'admin.periods.activeCheck' : 'admin.periods.activateOnCreate')}</label>
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary">${icon(editing ? 'save' : 'plus', 18)}${editing ? 'Guardar cambios' : 'Crear periodo'}</button>
-      ${editing ? safe('<button type="button" class="btn btn-ghost" data-act="cancel">Cancelar</button>') : ''}
+      <button type="submit" class="btn btn-primary">${icon(editing ? 'save' : 'plus', 18)}${t(editing ? 'common.saveChanges' : 'admin.periods.create')}</button>
+      ${editing ? safe(html`<button type="button" class="btn btn-ghost" data-act="cancel">${t('common.cancel')}</button>`) : ''}
     </div>`;
 }
 
@@ -147,9 +148,9 @@ function checkDates(required) {
   clearErrors(form);
   const start = form.elements.start_date.value;
   const end = form.elements.end_date.value;
-  if (required && !start) return showError(form, { field: 'start_date', message: 'La fecha de inicio es obligatoria.' }), false;
-  if (required && !end) return showError(form, { field: 'end_date', message: 'La fecha de fin es obligatoria.' }), false;
-  if (start && end && end <= start) return showError(form, { field: 'end_date', message: 'La fecha de fin debe ser posterior a la de inicio.' }), false;
+  if (required && !start) return showError(form, { field: 'start_date', message: t('admin.periods.startRequired') }), false;
+  if (required && !end) return showError(form, { field: 'end_date', message: t('admin.periods.endRequired') }), false;
+  if (start && end && end <= start) return showError(form, { field: 'end_date', message: t('errors.PERIOD_DATES_INVALID') }), false;
   return true;
 }
 
@@ -158,7 +159,7 @@ async function onSubmit(e) {
   form.querySelector('.form-alert').innerHTML = '';
   const name = form.elements.name.value.trim();
   clearErrors(form);
-  if (!name) return showError(form, { field: 'name', message: 'El nombre del periodo es obligatorio.' });
+  if (!name) return showError(form, { field: 'name', message: t('admin.periods.nameRequired') });
   if (!checkDates(true)) return;
   const data = {
     name,
@@ -170,11 +171,11 @@ async function onSubmit(e) {
   try {
     if (editing) {
       await withBusy(btn, () => put(`/admin/periods/${editing.id}`, data));
-      toast('Los cambios se guardaron.');
+      toast(t('common.saved'));
       cancelEdit();
     } else {
       await withBusy(btn, () => post('/admin/periods', data));
-      toast(`Se creó el periodo ${name}.`);
+      toast(t('admin.periods.created', { name }));
       form.reset();
     }
     await load();

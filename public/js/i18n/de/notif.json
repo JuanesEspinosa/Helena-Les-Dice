@@ -1,0 +1,24 @@
+{
+  "notif": {
+    "revision": {
+      "submitted": { "title": "{team} hat „{section}“ zur Prüfung eingereicht", "body": "{user} hat den Abschnitt fertiggestellt und wartet auf Ihre Prüfung." },
+      "approved": { "title": "„{section}“ wurde freigegeben", "body": "Geprüft von {reviewer}." },
+      "approvedNote": { "title": "„{section}“ wurde freigegeben", "body": "{reviewer}: „{note}“" },
+      "returned": { "title": "„{section}“ wurde mit Anmerkungen zurückgegeben", "body": "{reviewer}: „{note}“" }
+    },
+    "comment": {
+      "new": { "title": "Neuer Kommentar zu „{section}“", "body": "{user}: „{excerpt}“" },
+      "reply": { "title": "{user} hat in „{section}“ geantwortet", "body": "{user}: „{excerpt}“" }
+    },
+    "team": {
+      "added": { "title": "Sie wurden zu {team} hinzugefügt", "body": "Sie gehören jetzt in der Studienperiode {period} zu {team}." }
+    },
+    "level": {
+      "unlocked": { "title": "Level {nextN} freigeschaltet: {nextLevel}!", "body": "Sie haben Level {n} · {level} abgeschlossen und {points} Punkte erhalten." },
+      "allDone": { "title": "Sie haben alle Level des Dokuments abgeschlossen!", "body": "Sie haben Level {n} · {level} abgeschlossen und {points} Punkte erhalten." }
+    },
+    "badge": {
+      "earned": { "title": "Sie haben das Abzeichen „{name}“ erhalten!", "body": "{description} · +{points} Punkte" }
+    }
+  }
+}

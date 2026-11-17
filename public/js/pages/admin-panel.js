@@ -1,18 +1,19 @@
 // Vista 15 · Panel del administrador (RF-16)
 import { get } from '../core/api.js';
-import { html, icon, safe, emptyState, ago, toast } from '../core/ui.js';
+import { html, icon, safe, emptyState, ago, toast, fmtNumber } from '../core/ui.js';
 import { initLayout, setMain } from '../core/layout.js';
+import { t, getLocale } from '../core/i18n.js';
 
-const ROLE_LABEL = { estudiante: 'Estudiante', docente: 'Docente', administrador: 'Administrador' };
+// El texto de cada grupo sale de admin.panel.byRole.<key>
 const DIST = [
-  { key: 'estudiante', label: 'Estudiantes', color: 'var(--green)' },
-  { key: 'docente', label: 'Docentes', color: '#F2B33D' },
-  { key: 'administrador', label: 'Administradores', color: 'var(--text)' },
+  { key: 'estudiante', color: 'var(--green)' },
+  { key: 'docente', color: '#F2B33D' },
+  { key: 'administrador', color: 'var(--text)' },
 ];
-const longDate = new Intl.DateTimeFormat('es-CO', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+const distLabel = (r) => t(`admin.panel.byRole.${r.key}`);
 const fmtLong = (d) => {
-  const s = longDate.format(new Date(d));
-  return s.charAt(0).toUpperCase() + s.slice(1);
+  const s = new Intl.DateTimeFormat(getLocale(), { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }).format(new Date(d));
+  return s.charAt(0).toLocaleUpperCase(getLocale()) + s.slice(1);
 };
 
 await initLayout({ roles: ['administrador'], active: 'panel' });
@@ -25,8 +26,8 @@ try {
 
 function head() {
   return safe(html`<div class="page-head"><div>
-    <h1 class="page-title">Panel del administrador</h1>
-    <p class="page-sub">Resumen de las cuentas y del estado de la plataforma.</p>
+    <h1 class="page-title">${t('admin.panel.title')}</h1>
+    <p class="page-sub">${t('admin.panel.lead')}</p>
   </div></div>`);
 }
 
@@ -34,10 +35,10 @@ function render(d) {
   setMain(html`
     ${head()}
     <div class="grid grid-4">
-      ${stat('Total de usuarios', d.total, 'users')}
-      ${stat('Cuentas activas', d.active, 'checkCircle', 'color:var(--st-ok)')}
-      ${stat('Cuentas inactivas', d.inactive, 'lock')}
-      ${stat('Periodo activo', d.period || 'Ninguno', 'calendar')}
+      ${stat(t('admin.panel.totalUsers'), fmtNumber(d.total), 'users')}
+      ${stat(t('admin.panel.activeAccounts'), fmtNumber(d.active), 'checkCircle', 'color:var(--st-ok)')}
+      ${stat(t('admin.panel.inactiveAccounts'), fmtNumber(d.inactive), 'lock')}
+      ${stat(t('admin.panel.activePeriod'), d.period || t('admin.panel.none'), 'calendar')}
     </div>
     <div class="split">
       <div class="grow stack" style="gap:24px">
@@ -60,12 +61,12 @@ function stat(label, value, iconName, style = '') {
 
 function quickLinks() {
   const links = [
-    { href: '/admin/usuarios.html#nuevo', icon: 'users', title: 'Crear usuario', text: 'Estudiante, docente o administrador', primary: true },
-    { href: '/admin/periodos.html#nuevo', icon: 'calendar', title: 'Nuevo periodo', text: 'Abrir el siguiente semestre' },
-    { href: '/admin/backups.html', icon: 'database', title: 'Copia de seguridad', text: 'Generar y descargar ahora' },
+    { href: '/admin/usuarios.html#nuevo', icon: 'users', title: t('admin.panel.quick.userTitle'), text: t('admin.panel.quick.userText'), primary: true },
+    { href: '/admin/periodos.html#nuevo', icon: 'calendar', title: t('admin.panel.quick.periodTitle'), text: t('admin.panel.quick.periodText') },
+    { href: '/admin/backups.html', icon: 'database', title: t('admin.panel.quick.backupTitle'), text: t('admin.panel.quick.backupText') },
   ];
   return safe(html`<section aria-labelledby="acc" class="stack">
-    <h2 id="acc" class="card-title" style="font-size:18px">Accesos rápidos</h2>
+    <h2 id="acc" class="card-title" style="font-size:18px">${t('admin.panel.quickLinks')}</h2>
     <div class="grid grid-3">
       ${links.map((l) => safe(html`<a class="quick ${l.primary ? 'quick--primary' : ''}" href="${l.href}">
         ${icon(l.icon, 26)}<span class="quick__title">${l.title}</span><span class="quick__text">${l.text}</span>
@@ -76,19 +77,19 @@ function quickLinks() {
 
 function recentTable(d) {
   const body = d.empty || d.recent.length === 0
-    ? emptyState('users', 'Aún no hay otros usuarios', 'Crea la primera cuenta de estudiante o docente para empezar.',
-      html`<a class="btn btn-primary" href="/admin/usuarios.html#nuevo">${icon('plus', 18)}Crear primer usuario</a>`)
+    ? emptyState('users', t('admin.panel.noUsersTitle'), t('admin.panel.noUsersText'),
+      html`<a class="btn btn-primary" href="/admin/usuarios.html#nuevo">${icon('plus', 18)}${t('admin.panel.createFirstUser')}</a>`)
     : safe(html`<div class="table-wrap"><table class="table">
-        <thead><tr><th scope="col">Nombre</th><th scope="col">Tipo</th><th scope="col">Creada</th></tr></thead>
+        <thead><tr><th scope="col">${t('fields.name')}</th><th scope="col">${t('admin.type')}</th><th scope="col">${t('admin.panel.created')}</th></tr></thead>
         <tbody>${d.recent.map((u) => safe(html`<tr>
           <td><strong>${u.name}</strong><div class="muted small">${u.email}</div></td>
-          <td><span class="tag">${ROLE_LABEL[u.role]}</span>${u.active ? '' : safe(' <span class="pill pill-inactivo">Inactiva</span>')}</td>
+          <td><span class="tag">${t(`roles.${u.role}`)}</span>${u.active ? '' : safe(html` <span class="pill pill-inactivo">${t('admin.inactive')}</span>`)}</td>
           <td class="muted">${ago(u.created_at)}</td>
         </tr>`))}</tbody>
       </table></div>`);
   return safe(html`<section class="card" aria-labelledby="rec">
-    <div class="card-head"><h2 id="rec" class="card-title">Cuentas creadas recientemente</h2>
-      <a href="/admin/usuarios.html" class="btn btn-ghost btn-sm">Ver todos${icon('chevronRight', 16)}</a></div>
+    <div class="card-head"><h2 id="rec" class="card-title">${t('admin.panel.recent')}</h2>
+      <a href="/admin/usuarios.html" class="btn btn-ghost btn-sm">${t('admin.panel.seeAll')}${icon('chevronRight', 16)}</a></div>
     ${body}
   </section>`);
 }
@@ -99,11 +100,11 @@ function distribution(d) {
     ? DIST.filter((r) => d.byRole[r.key] > 0).map((r) => safe(html`<span style="width:${(d.byRole[r.key] / total) * 100}%;background:${r.color}"></span>`))
     : '';
   return safe(html`<section class="card card-pad stack" aria-labelledby="dist">
-    <h2 id="dist" class="card-title">Usuarios por tipo</h2>
-    <div class="dist-bar" role="img" aria-label="${DIST.map((r) => `${r.label}: ${d.byRole[r.key]}`).join(', ')}">${bar}</div>
+    <h2 id="dist" class="card-title">${t('admin.panel.usersByType')}</h2>
+    <div class="dist-bar" role="img" aria-label="${DIST.map((r) => `${distLabel(r)}: ${fmtNumber(d.byRole[r.key])}`).join(', ')}">${bar}</div>
     <div class="stack" style="gap:8px">
       ${DIST.map((r) => safe(html`<div class="row" style="flex-wrap:nowrap">
-        <span class="dist-dot" style="background:${r.color}"></span><span style="flex:1">${r.label}</span><strong>${d.byRole[r.key]}</strong>
+        <span class="dist-dot" style="background:${r.color}"></span><span style="flex:1">${distLabel(r)}</span><strong>${fmtNumber(d.byRole[r.key])}</strong>
       </div>`))}
     </div>
   </section>`);
@@ -111,10 +112,10 @@ function distribution(d) {
 
 function platform(p) {
   return safe(html`<section class="card card-pad stack" aria-labelledby="est">
-    <h2 id="est" class="card-title">Estado de la plataforma</h2>
-    <div class="row"><span class="dist-dot" style="background:var(--green);border-radius:50%"></span><span>${p.online ? 'Servicio en línea' : 'Servicio con fallas'}</span></div>
-    <div class="row between"><span class="muted">Última copia automática</span><strong>${p.lastAutomatic ? fmtLong(p.lastAutomatic) : 'Aún no hay'}</strong></div>
-    <div class="row between"><span class="muted">Próxima copia</span><strong>${p.nextAutomatic ? fmtLong(p.nextAutomatic) : 'En la próxima hora'}</strong></div>
-    <a class="btn btn-outline btn-sm" href="/admin/backups.html" style="align-self:flex-start">${icon('history', 16)}Ver historial de copias</a>
+    <h2 id="est" class="card-title">${t('admin.panel.platform')}</h2>
+    <div class="row"><span class="dist-dot" style="background:var(--green);border-radius:50%"></span><span>${t(p.online ? 'admin.panel.online' : 'admin.panel.degraded')}</span></div>
+    <div class="row between"><span class="muted">${t('admin.panel.lastAuto')}</span><strong>${p.lastAutomatic ? fmtLong(p.lastAutomatic) : t('admin.panel.noneYet')}</strong></div>
+    <div class="row between"><span class="muted">${t('admin.panel.nextBackup')}</span><strong>${p.nextAutomatic ? fmtLong(p.nextAutomatic) : t('admin.panel.withinHour')}</strong></div>
+    <a class="btn btn-outline btn-sm" href="/admin/backups.html" style="align-self:flex-start">${icon('history', 16)}${t('admin.panel.backupHistory')}</a>
   </section>`);
 }

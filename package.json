@@ -9,6 +9,8 @@
     "dev": "node --watch server/index.js",
     "db:init": "node db/init.js",
     "db:seed": "node db/seed.js",
+    "db:migrate": "node db/migrate.js",
+    "i18n:check": "node scripts/i18n-check.js",
     "db:reset": "node db/init.js && node db/seed.js",
     "test": "node --test --test-concurrency=1 \"test/**/*.test.js\""
   },

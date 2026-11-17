@@ -87,13 +87,13 @@ router.get('/:id', ah(async (req, res) => {
 // ---------- Guardar, enviar y revisar (la lógica vive en services/sections.js) ----------
 router.put('/:id', ah(async (req, res) => {
   const { content, auto } = req.body || {};
-  if (typeof content !== 'string') throw new HttpError(400, 'Falta el contenido de la sección.', 'content');
+  if (typeof content !== 'string') throw new HttpError(400, 'Falta el contenido de la sección.', 'content', { code: 'CONTENT_REQUIRED' });
   res.json(await saveSection(req.session.user, sectionId(req), content, auto === true ? 'automatico' : 'manual'));
 }));
 
 router.post('/:id/submit', ah(async (req, res) => {
   const { content } = req.body || {};
-  if (content !== undefined && typeof content !== 'string') throw new HttpError(400, 'El contenido no es válido.', 'content');
+  if (content !== undefined && typeof content !== 'string') throw new HttpError(400, 'El contenido no es válido.', 'content', { code: 'CONTENT_INVALID' });
   res.json(await submitSection(req.session.user, sectionId(req), content));
 }));
 
@@ -123,13 +123,13 @@ router.post('/:id/comments', ah(async (req, res) => {
   const comment = await tx(async (client) => {
     const section = await loadSectionFor(user, id, client);
     if (!permissionsFor(user, section, true).canComment) {
-      throw new HttpError(403, 'Solo la docente y los integrantes del equipo pueden comentar.');
+      throw new HttpError(403, 'Solo la docente y los integrantes del equipo pueden comentar.', undefined, { code: 'COMMENT_FORBIDDEN' });
     }
     let parent = null;
     if (parentRaw !== undefined && parentRaw !== null && parentRaw !== '') {
       const { rows } = await client.query('SELECT id, parent_id, author_id FROM comments WHERE id = $1 AND section_id = $2',
         [requireInt(parentRaw, 'parent_id', 'El comentario al que respondes'), id]);
-      if (!rows[0]) throw new HttpError(404, 'El comentario al que respondes no existe.');
+      if (!rows[0]) throw new HttpError(404, 'El comentario al que respondes no existe.', undefined, { code: 'PARENT_COMMENT_NOT_FOUND' });
       parent = rows[0];
       // Las respuestas se cuelgan siempre del comentario principal del hilo
       if (parent.parent_id) parent = (await client.query('SELECT id, parent_id, author_id FROM comments WHERE id = $1', [parent.parent_id])).rows[0];
@@ -145,6 +145,8 @@ router.post('/:id/comments', ah(async (req, res) => {
       title: parent ? `${user.name} respondió en "${section.name}"` : `Nuevo comentario en "${section.name}"`,
       body: `${user.name}: “${body.slice(0, 160)}”`,
       link: `/editor.html?id=${id}`,
+      msgKey: parent ? 'comment.reply' : 'comment.new',
+      params: { user: user.name, section: section.name, excerpt: body.slice(0, 160) },
     });
     await evaluateAchievements(client, section.team_id, user.id);
     return rows[0];
@@ -156,18 +158,18 @@ router.post('/comments/:cid/resolve', ah(async (req, res) => {
   const user = req.session.user;
   const cid = requireInt(req.params.cid, 'cid', 'El comentario');
   const found = await one('SELECT id, section_id, parent_id, resolved FROM comments WHERE id = $1', [cid]);
-  if (!found) throw new HttpError(404, 'El comentario no existe.');
+  if (!found) throw new HttpError(404, 'El comentario no existe.', undefined, { code: 'COMMENT_NOT_FOUND' });
   const result = await tx(async (client) => {
     const section = await loadSectionFor(user, found.section_id, client);
-    if (!isMember(user)) throw new HttpError(403, 'Solo los integrantes del equipo pueden marcar comentarios como atendidos.');
-    if (found.parent_id) throw new HttpError(400, 'Marca como atendido el comentario principal del hilo.');
+    if (!isMember(user)) throw new HttpError(403, 'Solo los integrantes del equipo pueden marcar comentarios como atendidos.', undefined, { code: 'RESOLVE_FORBIDDEN' });
+    if (found.parent_id) throw new HttpError(400, 'Marca como atendido el comentario principal del hilo.', undefined, { code: 'RESOLVE_ROOT_ONLY' });
     // El comentario nunca se borra: solo queda marcado como atendido (RF-10)
     const upd = await client.query(
       `UPDATE comments SET resolved = TRUE, resolved_by = $1, resolved_at = now()
         WHERE id = $2 AND NOT resolved RETURNING resolved_at`,
       [user.id, cid]
     );
-    if (upd.rowCount === 0) throw new HttpError(409, 'El comentario ya estaba marcado como atendido.');
+    if (upd.rowCount === 0) throw new HttpError(409, 'El comentario ya estaba marcado como atendido.', undefined, { code: 'COMMENT_ALREADY_RESOLVED' });
     await logActivity(client, { userId: user.id, teamId: section.team_id, sectionId: section.id, action: 'atendio_comentario', detail: section.name });
     await evaluateAchievements(client, section.team_id, user.id);
     return { resolved: true, resolved_at: upd.rows[0].resolved_at, resolved_by_name: user.name };
@@ -202,7 +204,7 @@ router.get('/:id/versions/:n/diff', ah(async (req, res) => {
                  FROM section_versions v JOIN users u ON u.id = v.author_id
                 WHERE v.section_id = $1 AND v.number = $2`;
   const version = await one(sql, [s.id, n]);
-  if (!version) throw new HttpError(404, 'Esa versión no existe.');
+  if (!version) throw new HttpError(404, 'Esa versión no existe.', undefined, { code: 'VERSION_NOT_FOUND' });
   const previous = n > 1 ? await one(sql, [s.id, n - 1]) : null;
   const parts = diffWords(plainText(previous && previous.content), plainText(version.content))
     .map((p) => ({ value: p.value, added: Boolean(p.added), removed: Boolean(p.removed) }));

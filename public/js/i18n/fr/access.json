@@ -1,0 +1,71 @@
+{
+  "access": {
+    "brand": {
+      "label": "Présentation de la plateforme",
+      "lead": "Rédigez le document de votre projet niveau par niveau, avec des rôles clairs pour votre équipe et des retours rapides de votre enseignant.",
+      "levelsLabel": "Les cinq niveaux du document IEEE 830",
+      "level1": "Introduction",
+      "level2": "Description générale",
+      "level3": "Exigences spécifiques",
+      "level4": "Conception du projet",
+      "level5": "Annexes",
+      "benefit1Title": "Des niveaux par sprints",
+      "benefit1Text": "Chaque niveau se débloque une fois le précédent approuvé.",
+      "benefit2Title": "La contribution de chaque membre",
+      "benefit2Text": "Chaque modification est conservée dans l’historique.",
+      "benefit3Title": "Les succès de l’équipe",
+      "benefit3Text": "Des points et des badges pour chaque section approuvée."
+    },
+    "privacy": "Vos données sont traitées conformément à la loi 1581 de 2012 et aux politiques du POLI JIC.",
+    "emailLabel": "Adresse e-mail institutionnelle",
+    "emailPlaceholder": "prenom_nom@elpoli.edu.co",
+    "emailRequired": "Saisissez votre adresse e-mail institutionnelle.",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "login": {
+      "pageTitle": "Connexion · Helena les dice",
+      "title": "Connexion",
+      "lead": "Connectez-vous avec votre adresse e-mail institutionnelle.",
+      "password": "Mot de passe",
+      "forgot": "Mot de passe oublié ?",
+      "submit": "Se connecter",
+      "idleNote": "Par sécurité, la session se ferme automatiquement après 30 minutes d’inactivité.",
+      "passwordRequired": "Saisissez votre mot de passe.",
+      "passwordReset": "Votre mot de passe a été mis à jour. Vous pouvez maintenant vous connecter.",
+      "loginToContinue": "Connectez-vous pour continuer.",
+      "attemptsLeft": {
+        "one": "Il vous reste {count} tentative avant un blocage de {minutes} minutes.",
+        "other": "Il vous reste {count} tentatives avant un blocage de {minutes} minutes."
+      }
+    },
+    "recover": {
+      "pageTitle": "Récupérer le mot de passe · Helena les dice",
+      "back": "Retour à la connexion",
+      "step": "Étape {n} sur {total}",
+      "title": "Mot de passe oublié ?",
+      "lead": "Saisissez votre adresse e-mail institutionnelle et nous vous enverrons un lien pour en créer un nouveau.",
+      "send": "Envoyer le lien",
+      "sentTitle": "Consultez votre messagerie",
+      "sentText": "Si l’adresse est correcte, vous recevrez un lien pour réinitialiser votre mot de passe. Ce lien est valable 1 heure.",
+      "sentSpam": "Vous ne l’avez pas reçu ? Vérifiez votre dossier de courrier indésirable.",
+      "resend": "Renvoyer",
+      "otherEmail": "Utiliser une autre adresse",
+      "resent": "Si l’adresse est correcte, un nouveau lien vous a été envoyé.",
+      "invalidTitle": "Lien non valide",
+      "restart": "Demander un nouveau lien",
+      "newTitle": "Créez votre nouveau mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "saveAndLogin": "Enregistrer et se connecter"
+    },
+    "rules": {
+      "label": "Exigences du mot de passe",
+      "len": "8 caractères minimum",
+      "num": "Au moins un chiffre",
+      "same": "Les deux mots de passe sont identiques",
+      "met": "(respectée)",
+      "pending": "(en attente)",
+      "notMet": "Le mot de passe ne remplit pas encore toutes les exigences."
+    }
+  }
+}

@@ -48,7 +48,7 @@ app.use('/api', (req, res, next) => {
   if (s && s.user) {
     const now = Date.now();
     if (s.lastActivity && now - s.lastActivity > INACTIVITY_MS) {
-      return s.destroy(() => next(new HttpError(401, 'Tu sesión se cerró por 30 minutos de inactividad.')));
+      return s.destroy(() => next(new HttpError(401, 'Tu sesión se cerró por 30 minutos de inactividad.', undefined, { code: 'SESSION_IDLE' })));
     }
     if (req.get('X-Background') !== '1') s.lastActivity = now;
   }
@@ -58,7 +58,7 @@ app.use('/api', (req, res, next) => {
 // Las peticiones que modifican datos deben ser JSON (mitiga envíos de formularios de otros sitios)
 app.use('/api', (req, _res, next) => {
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) && !req.is('application/json')) {
-    return next(new HttpError(415, 'Las peticiones deben enviarse en formato JSON.'));
+    return next(new HttpError(415, 'Las peticiones deben enviarse en formato JSON.', undefined, { code: 'JSON_REQUIRED' }));
   }
   next();
 });
@@ -71,23 +71,26 @@ app.use('/api/student', requireRole('estudiante'), require('./routes/student'));
 app.use('/api/teacher', requireRole('docente'), require('./routes/teacher'));
 app.use('/api/admin', requireRole('administrador'), require('./routes/admin'));
 
-app.use('/api', (_req, _res, next) => next(new HttpError(404, 'Ruta no encontrada.')));
+app.use('/api', (_req, _res, next) => next(new HttpError(404, 'Ruta no encontrada.', undefined, { code: 'ROUTE_NOT_FOUND' })));
 
 // ---------- Archivos del front ----------
 app.use(express.static(path.join(__dirname, '..', 'public'), { extensions: ['html'] }));
 
 // ---------- Manejador central de errores ----------
 app.use((err, _req, res, _next) => {
-  if (err.type === 'entity.too.large') err = new HttpError(413, 'El contenido enviado es demasiado grande.');
-  if (err.type === 'entity.parse.failed') err = new HttpError(400, 'El cuerpo de la petición no es JSON válido.');
+  if (err.type === 'entity.too.large') err = new HttpError(413, 'El contenido enviado es demasiado grande.', undefined, { code: 'PAYLOAD_TOO_LARGE' });
+  if (err.type === 'entity.parse.failed') err = new HttpError(400, 'El cuerpo de la petición no es JSON válido.', undefined, { code: 'JSON_INVALID' });
   // Violaciones de restricciones de PostgreSQL convertidas en mensajes claros
-  if (err.code === '23505') err = new HttpError(409, 'Ya existe un registro con esos datos.');
-  if (err.code === '23503') err = new HttpError(409, 'El registro está relacionado con otros datos y no se puede modificar así.');
+  if (err.code === '23505') err = new HttpError(409, 'Ya existe un registro con esos datos.', undefined, { code: 'DUPLICATE' });
+  if (err.code === '23503') err = new HttpError(409, 'El registro está relacionado con otros datos y no se puede modificar así.', undefined, { code: 'FK_CONFLICT' });
   const status = err.status || 500;
   if (status >= 500) console.error('[error]', err);
   res.status(status).json({
     error: status >= 500 ? 'Ocurrió un error en el servidor. Intenta de nuevo.' : err.message,
     field: err.field,
+    // Solo los HttpError llevan un código del catálogo; otros errores (de librerías) no exponen el suyo
+    code: status >= 500 ? 'SERVER_ERROR' : (err instanceof HttpError ? err.code : undefined),
+    params: status >= 500 || !(err instanceof HttpError) ? undefined : err.params,
   });
 });
 

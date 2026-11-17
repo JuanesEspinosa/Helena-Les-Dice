@@ -2,6 +2,7 @@
 import { get, post, put, del } from '../core/api.js';
 import { initLayout, setMain } from '../core/layout.js';
 import { html, safe, icon, emptyState, loading, toast, clearErrors, showError, withBusy, confirmDialog } from '../core/ui.js';
+import { t } from '../core/i18n.js';
 
 /** Fragmento HTML ya escapado para anidar dentro de otra plantilla. */
 const h = (...args) => safe(html(...args));
@@ -12,10 +13,10 @@ await initLayout({ roles: ['docente'], active: 'niveles' });
 setMain(html`
   <div class="page-head">
     <div>
-      <h1 class="page-title">Configurar niveles</h1>
-      <p class="page-sub">Define cuántos niveles tiene el documento, en qué orden van y qué secciones forman cada uno.</p>
+      <h1 class="page-title">${t('menu.docente.niveles')}</h1>
+      <p class="page-sub">${t('teacher.levels.lead')}</p>
     </div>
-    <button type="button" class="btn btn-outline" id="add-level">${icon('plus', 18)}Agregar nivel</button>
+    <button type="button" class="btn btn-outline" id="add-level">${icon('plus', 18)}${t('teacher.levels.addLevel')}</button>
   </div>
   <div class="split" id="levels-root">${loading()}</div>`);
 
@@ -27,7 +28,7 @@ async function load(keepId) {
     const { levels } = await get('/teacher/levels');
     applyLevels(levels, keepId);
   } catch (err) {
-    document.getElementById('levels-root').innerHTML = emptyState('alert', 'No se pudieron cargar los niveles', err.message).value;
+    document.getElementById('levels-root').innerHTML = emptyState('alert', t('teacher.levels.loadError'), err.message).value;
   }
 }
 
@@ -59,13 +60,13 @@ const isDirty = () => state.draft && comparable(state.draft) !== comparable(draf
 function renderAll() {
   const root = document.getElementById('levels-root');
   if (state.levels.length === 0) {
-    root.innerHTML = html`<div class="card grow">${emptyState('layers', 'Todavía no hay niveles', 'Agrega el primer nivel del documento con el botón "Agregar nivel".')}</div>`;
+    root.innerHTML = html`<div class="card grow">${emptyState('layers', t('teacher.levels.emptyTitle'), t('teacher.levels.emptyText'))}</div>`;
     return;
   }
   root.innerHTML = html`
     <section class="card card-pad side" aria-labelledby="orden" style="padding:12px;flex:1 1 320px">
-      <h2 id="orden" class="card-title" style="margin:8px 8px 4px">Orden de los niveles</h2>
-      <p class="muted small" style="margin:0 8px 12px">Arrastra desde el asa o usa las flechas para cambiar el orden.</p>
+      <h2 id="orden" class="card-title" style="margin:8px 8px 4px">${t('teacher.levels.orderTitle')}</h2>
+      <p class="muted small" style="margin:0 8px 12px">${t('teacher.levels.orderHint')}</p>
       <ol class="sortable" id="level-list">${state.levels.map(levelItem)}</ol>
     </section>
     <section class="card grow" aria-labelledby="edit" id="edit-card" style="flex:999 1 520px">${editPanel()}</section>`;
@@ -79,14 +80,14 @@ function levelItem(l, i) {
   const n = state.levels.length;
   return h`
     <li class="lv-item" data-id="${l.id}" aria-current="${l.id === state.selectedId}">
-      <span class="grip" title="Arrastrar para reordenar" aria-hidden="true">${icon('grip', 18)}</span>
+      <span class="grip" title="${t('teacher.levels.dragToReorder')}" aria-hidden="true">${icon('grip', 18)}</span>
       <button type="button" class="lv-item__select" data-select="${l.id}">
         <span class="lv-num">${l.position}</span>
-        <span class="lv-item__text"><strong>${l.name}</strong><span class="muted">${l.sections.length} ${l.sections.length === 1 ? 'sección' : 'secciones'} · ${l.points} puntos${l.teams_started ? ` · ${l.teams_started} equipo(s) trabajando` : ''}</span></span>
+        <span class="lv-item__text"><strong>${l.name}</strong><span class="muted">${t('teacher.team.sections', { count: l.sections.length })} · ${t('student.points', { count: l.points })}${l.teams_started ? ` · ${t('teacher.levels.teamsWorking', { count: l.teams_started })}` : ''}</span></span>
       </button>
       <span class="move-btns">
-        <button type="button" class="btn btn-sm" data-move="${l.id}" data-dir="-1" aria-label="Subir el nivel ${l.name}" ${i === 0 ? 'disabled' : ''}>${icon('arrowUp', 16)}</button>
-        <button type="button" class="btn btn-sm" data-move="${l.id}" data-dir="1" aria-label="Bajar el nivel ${l.name}" ${i === n - 1 ? 'disabled' : ''}>${icon('arrowDown', 16)}</button>
+        <button type="button" class="btn btn-sm" data-move="${l.id}" data-dir="-1" aria-label="${t('teacher.levels.moveLevelUp', { name: l.name })}" ${i === 0 ? 'disabled' : ''}>${icon('arrowUp', 16)}</button>
+        <button type="button" class="btn btn-sm" data-move="${l.id}" data-dir="1" aria-label="${t('teacher.levels.moveLevelDown', { name: l.name })}" ${i === n - 1 ? 'disabled' : ''}>${icon('arrowDown', 16)}</button>
       </span>
     </li>`;
 }
@@ -112,7 +113,7 @@ function wireLevelList() {
 async function selectLevel(id) {
   if (id === state.selectedId) return;
   if (isDirty()) {
-    const ok = await confirmDialog({ title: 'Descartar cambios', message: 'Tienes cambios sin guardar en este nivel. ¿Quieres descartarlos?', confirmText: 'Descartar', danger: true });
+    const ok = await confirmDialog({ title: t('teacher.levels.discardTitle'), message: t('teacher.levels.discardThis'), confirmText: t('teacher.levels.discard'), danger: true });
     if (!ok) return;
   }
   state.selectedId = id;
@@ -127,8 +128,8 @@ function startedWarning(levels) {
   if (busy.length === 0) return null;
   const max = Math.max(...busy.map((l) => l.teams_started));
   return busy.length === 1
-    ? `${max} ${max === 1 ? 'equipo ya está trabajando' : 'equipos ya están trabajando'} en el nivel "${busy[0].name}".`
-    : `Hay equipos trabajando en ${busy.length} de los niveles que cambian de lugar (hasta ${max} por nivel).`;
+    ? t('teacher.levels.busyOne', { count: max, name: busy[0].name })
+    : t('teacher.levels.busyMany', { levels: busy.length, max });
 }
 
 async function reorderLevels(ids, focusId) {
@@ -137,7 +138,7 @@ async function reorderLevels(ids, focusId) {
   const moved = state.levels.filter((l) => before.indexOf(l.id) !== ids.indexOf(l.id));
   const warning = startedWarning(moved);
   if (warning) {
-    const ok = await confirmDialog({ title: 'Cambiar el orden de los niveles', message: `${warning} Si cambias el orden, el cambio les llegará de inmediato.`, confirmText: 'Cambiar orden' });
+    const ok = await confirmDialog({ title: t('teacher.levels.reorderTitle'), message: `${warning} ${t('teacher.levels.reorderImmediate')}`, confirmText: t('teacher.levels.reorderConfirm') });
     if (!ok) return;
   }
   try {
@@ -145,7 +146,7 @@ async function reorderLevels(ids, focusId) {
     const { levels } = await put('/teacher/levels/order', { ids });
     applyLevels(levels);
     if (pending) { state.draft = { ...pending, position: selected().position }; renderAll(); }
-    toast('Se actualizó el orden de los niveles.');
+    toast(t('teacher.levels.reordered'));
     if (focusId) document.querySelector(`[data-move="${focusId}"]`)?.focus();
   } catch (err) {
     toast(err.message, 'error');
@@ -154,13 +155,13 @@ async function reorderLevels(ids, focusId) {
 
 async function addLevel(button) {
   if (isDirty()) {
-    const ok = await confirmDialog({ title: 'Descartar cambios', message: 'Tienes cambios sin guardar en el nivel actual. ¿Quieres descartarlos?', confirmText: 'Descartar', danger: true });
+    const ok = await confirmDialog({ title: t('teacher.levels.discardTitle'), message: t('teacher.levels.discardCurrent'), confirmText: t('teacher.levels.discard'), danger: true });
     if (!ok) return;
   }
   try {
-    const { level } = await withBusy(button, () => post('/teacher/levels', { name: `Nivel ${state.levels.length + 1}`, description: '', points: 100 }));
+    const { level } = await withBusy(button, () => post('/teacher/levels', { name: t('common.levelN', { n: state.levels.length + 1 }), description: '', points: 100 }));
     await load(level.id);
-    toast('Se agregó el nivel al final. Ponle nombre y secciones.');
+    toast(t('teacher.levels.added'));
     document.querySelector('#level-form [name="name"]')?.select();
   } catch (err) {
     toast(err.message, 'error');
@@ -172,62 +173,62 @@ async function addLevel(button) {
 function editPanel() {
   const d = state.draft;
   const lv = selected();
-  if (!d) return emptyState('layers', 'Elige un nivel', 'Selecciónalo en la lista para editarlo.');
+  if (!d) return emptyState('layers', t('teacher.levels.pickTitle'), t('teacher.levels.pickText'));
   const code = (i) => `${lv.position}.${i + 1}`;
   return h`
     <form id="level-form" class="card-body stack" style="gap:18px;padding:24px" novalidate>
-      <h2 id="edit" style="font-size:20px;font-weight:800">Editar nivel ${lv.position}</h2>
+      <h2 id="edit" style="font-size:20px;font-weight:800">${t('teacher.levels.editTitle', { n: lv.position })}</h2>
       ${lv.teams_started > 0 ? h`
         <div class="alert alert-warn" role="alert">${icon('warning', 20)}
-          <div><strong>${lv.teams_started} ${lv.teams_started === 1 ? 'equipo ya está trabajando' : 'equipos ya están trabajando'} en este nivel.</strong> Si cambias sus secciones, el cambio les llegará de inmediato.</div>
+          <div><strong>${t('teacher.levels.busyHere', { count: lv.teams_started })}</strong> ${t('teacher.levels.sectionsImmediate')}</div>
         </div>` : ''}
       <div class="form-alert"></div>
       <div class="edit-grid">
         <div class="field span-2">
-          <label class="label" for="n-name">Nombre del nivel</label>
+          <label class="label" for="n-name">${t('fields.levelName')}</label>
           <input class="input" id="n-name" name="name" maxlength="120" value="${d.name}" required>
         </div>
         <div class="field">
-          <label class="label" for="n-pos">Orden</label>
+          <label class="label" for="n-pos">${t('fields.position')}</label>
           <input class="input" id="n-pos" name="position" type="number" min="1" max="${state.levels.length}" step="1" value="${d.position}">
         </div>
         <div class="field span-2">
-          <label class="label" for="n-desc">Descripción</label>
+          <label class="label" for="n-desc">${t('fields.description')}</label>
           <textarea class="textarea" id="n-desc" name="description" rows="3" maxlength="2000">${d.description}</textarea>
         </div>
         <div class="field">
-          <label class="label" for="n-pts">Puntos al superarlo</label>
+          <label class="label" for="n-pts">${t('teacher.levels.pointsOnComplete')}</label>
           <input class="input" id="n-pts" name="points" type="number" min="0" max="10000" step="10" value="${d.points}">
         </div>
       </div>
       <div class="stack" style="gap:10px">
         <div class="row between">
-          <h3 style="font-size:16px;font-weight:800">Secciones del nivel</h3>
-          <button type="button" class="btn btn-sm btn-add-soft" id="add-section">${icon('plus', 16)}Agregar sección</button>
+          <h3 style="font-size:16px;font-weight:800">${t('teacher.levels.sectionsTitle')}</h3>
+          <button type="button" class="btn btn-sm btn-add-soft" id="add-section">${icon('plus', 16)}${t('teacher.levels.addSection')}</button>
         </div>
         <div class="field"><input type="hidden" name="sections"><div class="field-error"></div></div>
-        ${d.sections.length === 0 ? h`<p class="muted">Este nivel todavía no tiene secciones. Un nivel sin secciones se da por superado.</p>` : ''}
+        ${d.sections.length === 0 ? h`<p class="muted">${t('teacher.levels.noSections')}</p>` : ''}
         <ol class="sortable" id="sec-list">
           ${d.sections.map((s, i) => h`
             <li class="sec-item" data-key="${s.key}">
-              <span class="grip" title="Arrastrar para reordenar" aria-hidden="true">${icon('grip', 18)}</span>
+              <span class="grip" title="${t('teacher.levels.dragToReorder')}" aria-hidden="true">${icon('grip', 18)}</span>
               <span class="sec-item__code">${code(i)}</span>
-              <label class="sr-only" for="sec-${s.key}">Nombre de la sección ${code(i)}</label>
-              <input class="input" id="sec-${s.key}" data-sec-name="${s.key}" maxlength="160" value="${s.name}" placeholder="Nombre de la sección">
-              ${s.teams_started ? h`<span class="tag sec-item__used" title="Equipos con contenido en esta sección">${s.teams_started} eq.</span>` : ''}
+              <label class="sr-only" for="sec-${s.key}">${t('teacher.levels.sectionNameN', { code: code(i) })}</label>
+              <input class="input" id="sec-${s.key}" data-sec-name="${s.key}" maxlength="160" value="${s.name}" placeholder="${t('fields.sectionName')}">
+              ${s.teams_started ? h`<span class="tag sec-item__used" title="${t('teacher.levels.teamsWithContent')}">${t('teacher.levels.teamsShort', { count: s.teams_started })}</span>` : ''}
               <span class="move-btns">
-                <button type="button" class="btn btn-sm" data-sec-move="${s.key}" data-dir="-1" aria-label="Subir ${s.name || 'la sección'}" ${i === 0 ? 'disabled' : ''}>${icon('arrowUp', 16)}</button>
-                <button type="button" class="btn btn-sm" data-sec-move="${s.key}" data-dir="1" aria-label="Bajar ${s.name || 'la sección'}" ${i === d.sections.length - 1 ? 'disabled' : ''}>${icon('arrowDown', 16)}</button>
+                <button type="button" class="btn btn-sm" data-sec-move="${s.key}" data-dir="-1" aria-label="${t('teacher.levels.moveUp', { name: s.name || t('teacher.levels.theSection') })}" ${i === 0 ? 'disabled' : ''}>${icon('arrowUp', 16)}</button>
+                <button type="button" class="btn btn-sm" data-sec-move="${s.key}" data-dir="1" aria-label="${t('teacher.levels.moveDown', { name: s.name || t('teacher.levels.theSection') })}" ${i === d.sections.length - 1 ? 'disabled' : ''}>${icon('arrowDown', 16)}</button>
               </span>
-              <button type="button" class="btn btn-icon btn-ghost btn-sm" style="border:0;width:36px" data-sec-remove="${s.key}" aria-label="Quitar sección ${s.name}"
-                ${s.teams_started ? h`aria-disabled="true" title="${s.teams_started} equipo(s) ya tienen contenido en esta sección"` : ''}>${icon('trash', 18)}</button>
+              <button type="button" class="btn btn-icon btn-ghost btn-sm" style="border:0;width:36px" data-sec-remove="${s.key}" aria-label="${t('teacher.levels.removeSection', { name: s.name })}"
+                ${s.teams_started ? h`aria-disabled="true" title="${t('teacher.levels.sectionHasContent', { count: s.teams_started })}"` : ''}>${icon('trash', 18)}</button>
             </li>`)}
         </ol>
       </div>
       <div class="form-actions" style="padding-top:6px">
-        <button type="submit" class="btn btn-primary">${icon('save', 18)}Guardar cambios</button>
-        <button type="button" class="btn btn-outline" id="cancel-level">Cancelar</button>
-        <button type="button" class="btn btn-danger-outline" id="delete-level" style="margin-left:auto" ${lv.teams_started ? safe('aria-disabled="true" title="Hay equipos trabajando en este nivel"') : ''}>${icon('trash', 18)}Eliminar nivel</button>
+        <button type="submit" class="btn btn-primary">${icon('save', 18)}${t('common.saveChanges')}</button>
+        <button type="button" class="btn btn-outline" id="cancel-level">${t('common.cancel')}</button>
+        <button type="button" class="btn btn-danger-outline" id="delete-level" style="margin-left:auto" ${lv.teams_started ? safe(html`aria-disabled="true" title="${t('teacher.levels.levelBusy')}"`) : ''}>${icon('trash', 18)}${t('teacher.levels.deleteLevel')}</button>
       </div>
     </form>`;
 }
@@ -289,7 +290,7 @@ async function onEditClick(e) {
   if (rm) {
     const s = d.sections.find((x) => x.key === Number(rm.dataset.secRemove));
     if (s.teams_started) {
-      toast(`No se puede quitar "${s.name}": ${s.teams_started} equipo(s) ya tienen contenido en ella.`, 'error');
+      toast(t('teacher.levels.cannotRemoveSection', { name: s.name, count: s.teams_started }), 'error');
       return;
     }
     syncDraft(form);
@@ -300,7 +301,7 @@ async function onEditClick(e) {
   if (e.target.closest('#cancel-level')) {
     state.draft = draftFrom(selected());
     repaintEdit();
-    toast('Se descartaron los cambios.');
+    toast(t('teacher.levels.discarded'));
     return;
   }
   if (e.target.closest('#delete-level')) await deleteLevel();
@@ -308,15 +309,15 @@ async function onEditClick(e) {
 
 function validate(form) {
   const d = state.draft;
-  if (!d.name.trim()) return { field: 'name', message: 'El nombre del nivel es obligatorio.' };
+  if (!d.name.trim()) return { field: 'name', message: t('teacher.levels.nameRequired') };
   const pos = Number(d.position);
-  if (!Number.isInteger(pos) || pos < 1 || pos > state.levels.length) return { field: 'position', message: `El orden debe ser un número entre 1 y ${state.levels.length}.` };
+  if (!Number.isInteger(pos) || pos < 1 || pos > state.levels.length) return { field: 'position', message: t('teacher.levels.positionRange', { max: state.levels.length }) };
   const pts = Number(d.points);
-  if (d.points === '' || !Number.isInteger(pts) || pts < 0 || pts > 10000) return { field: 'points', message: 'Los puntos deben ser un número entero entre 0 y 10000.' };
+  if (d.points === '' || !Number.isInteger(pts) || pts < 0 || pts > 10000) return { field: 'points', message: t('errors.POINTS_INVALID', { max: 10000 }) };
   const empty = d.sections.find((s) => !s.name.trim());
   if (empty) {
     form.querySelector(`[data-sec-name="${empty.key}"]`)?.focus();
-    return { message: 'Cada sección necesita un nombre. Escríbelo o quita la sección vacía.' };
+    return { message: t('teacher.levels.sectionNameRequired') };
   }
   return null;
 }
@@ -333,9 +334,9 @@ async function onSave(e) {
   const d = state.draft;
   if (lv.teams_started > 0) {
     const ok = await confirmDialog({
-      title: 'Guardar cambios del nivel',
-      message: `${lv.teams_started} ${lv.teams_started === 1 ? 'equipo ya está trabajando' : 'equipos ya están trabajando'} en este nivel. Si cambias sus secciones, el cambio les llegará de inmediato.`,
-      confirmText: 'Guardar de todos modos',
+      title: t('teacher.levels.saveTitle'),
+      message: `${t('teacher.levels.busyHere', { count: lv.teams_started })} ${t('teacher.levels.sectionsImmediate')}`,
+      confirmText: t('teacher.levels.saveAnyway'),
     });
     if (!ok) return;
   }
@@ -351,7 +352,7 @@ async function onSave(e) {
       ({ levels } = await put('/teacher/levels/order', { ids }));
     }
     applyLevels(levels, d.id);
-    toast('Se guardaron los cambios del nivel.');
+    toast(t('teacher.levels.saved'));
   } catch (err) {
     showError(document.getElementById('level-form') || form, err);
   }
@@ -360,20 +361,20 @@ async function onSave(e) {
 async function deleteLevel() {
   const lv = selected();
   if (lv.teams_started > 0) {
-    toast(`No se puede eliminar: ${lv.teams_started} equipo(s) ya están trabajando en este nivel.`, 'error');
+    toast(t('teacher.levels.cannotDelete', { count: lv.teams_started }), 'error');
     return;
   }
   const ok = await confirmDialog({
-    title: `Eliminar el nivel ${lv.position}`,
-    message: `Se eliminará "${lv.name}" con sus ${lv.sections.length} secciones. Los niveles siguientes subirán un lugar.`,
-    confirmText: 'Eliminar nivel',
+    title: t('teacher.levels.deleteTitle', { n: lv.position }),
+    message: t('teacher.levels.deleteConfirm', { name: lv.name, count: lv.sections.length }),
+    confirmText: t('teacher.levels.deleteLevel'),
     danger: true,
   });
   if (!ok) return;
   try {
     const { levels } = await del(`/teacher/levels/${lv.id}`);
     applyLevels(levels, null);
-    toast('Se eliminó el nivel.');
+    toast(t('teacher.levels.deleted'));
   } catch (err) {
     toast(err.message, 'error');
   }

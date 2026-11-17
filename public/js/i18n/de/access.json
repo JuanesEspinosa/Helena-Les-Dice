@@ -1,0 +1,71 @@
+{
+  "access": {
+    "brand": {
+      "label": "Vorstellung der Plattform",
+      "lead": "Erstellen Sie das Dokument Ihres Projekts Level für Level – mit klaren Rollen im Team und zeitnahem Feedback Ihrer Lehrkraft.",
+      "levelsLabel": "Die fünf Level des IEEE-830-Dokuments",
+      "level1": "Einleitung",
+      "level2": "Allgemeine Beschreibung",
+      "level3": "Spezifische Anforderungen",
+      "level4": "Projektentwurf",
+      "level5": "Anhänge",
+      "benefit1Title": "Level in Sprints",
+      "benefit1Text": "Ein Level wird freigeschaltet, sobald das vorherige freigegeben ist.",
+      "benefit2Title": "Beiträge jedes Mitglieds",
+      "benefit2Text": "Jede Bearbeitung wird im Verlauf festgehalten.",
+      "benefit3Title": "Teamerfolge",
+      "benefit3Text": "Punkte und Abzeichen für freigegebene Abschnitte."
+    },
+    "privacy": "Ihre Daten werden gemäß Gesetz 1581 von 2012 und den Richtlinien des POLI JIC verarbeitet.",
+    "emailLabel": "Hochschul-E-Mail-Adresse",
+    "emailPlaceholder": "vorname_nachname@elpoli.edu.co",
+    "emailRequired": "Geben Sie Ihre Hochschul-E-Mail-Adresse ein.",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen",
+    "login": {
+      "pageTitle": "Anmelden · Helena les dice",
+      "title": "Anmelden",
+      "lead": "Melden Sie sich mit Ihrer Hochschul-E-Mail-Adresse an.",
+      "password": "Passwort",
+      "forgot": "Passwort vergessen?",
+      "submit": "Anmelden",
+      "idleNote": "Aus Sicherheitsgründen endet die Sitzung automatisch nach 30 Minuten ohne Aktivität.",
+      "passwordRequired": "Geben Sie Ihr Passwort ein.",
+      "passwordReset": "Ihr Passwort wurde aktualisiert. Sie können sich jetzt anmelden.",
+      "loginToContinue": "Melden Sie sich an, um fortzufahren.",
+      "attemptsLeft": {
+        "one": "Sie haben noch {count} Versuch, bevor Ihr Konto für {minutes} Minuten gesperrt wird.",
+        "other": "Sie haben noch {count} Versuche, bevor Ihr Konto für {minutes} Minuten gesperrt wird."
+      }
+    },
+    "recover": {
+      "pageTitle": "Passwort wiederherstellen · Helena les dice",
+      "back": "Zurück zur Anmeldung",
+      "step": "Schritt {n} von {total}",
+      "title": "Passwort vergessen?",
+      "lead": "Geben Sie Ihre Hochschul-E-Mail-Adresse ein. Wir senden Ihnen einen Link, mit dem Sie ein neues Passwort festlegen können.",
+      "send": "Link senden",
+      "sentTitle": "Prüfen Sie Ihr Postfach",
+      "sentText": "Wenn die E-Mail-Adresse stimmt, erhalten Sie einen Link zum Zurücksetzen Ihres Passworts. Der Link ist 1 Stunde lang gültig.",
+      "sentSpam": "Nichts angekommen? Sehen Sie in Ihrem Spam-Ordner nach.",
+      "resend": "Erneut senden",
+      "otherEmail": "Andere E-Mail-Adresse verwenden",
+      "resent": "Wir haben einen neuen Link gesendet, sofern die E-Mail-Adresse stimmt.",
+      "invalidTitle": "Ungültiger Link",
+      "restart": "Neuen Link anfordern",
+      "newTitle": "Legen Sie Ihr neues Passwort fest",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "saveAndLogin": "Speichern und anmelden"
+    },
+    "rules": {
+      "label": "Anforderungen an das Passwort",
+      "len": "Mindestens 8 Zeichen",
+      "num": "Enthält mindestens eine Ziffer",
+      "same": "Beide Passwörter stimmen überein",
+      "met": "(erfüllt)",
+      "pending": "(ausstehend)",
+      "notMet": "Das Passwort erfüllt noch nicht alle Anforderungen."
+    }
+  }
+}

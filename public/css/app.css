@@ -217,6 +217,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .field.has-error .input, .field.has-error .select, .field.has-error .textarea { border-color: var(--danger); background: #FFFBFA; }
 .field-error { display: none; align-items: center; gap: 6px; color: var(--danger); font-size: 13px; font-weight: 600; }
 .field.has-error .field-error { display: flex; }
+.lang-select { position: relative; }
+.lang-select .select { min-height: 44px; width: auto; padding-right: 32px; }
+.lang-select__code { display: none; }
 .input-icon { position: relative; }
 .input-icon > svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
 .input-icon > .input { padding-left: 42px; }
@@ -449,6 +452,24 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: minmax(0, 1fr); }
   .page-title { font-size: 23px; }
   .hide-sm { display: none !important; }
+  /* Cabecera en móvil: el selector de idioma sigue visible, más estrecho, y nada se desborda */
+  .header-actions { gap: 4px; flex: none; }
+  .app-header .brand { flex: 1 1 0; overflow: hidden; }
+  .app-header .brand-sub { display: none !important; }
+  .app-header .logo { width: 60px; max-width: 100%; height: auto; }
+  /* El select queda encima (se toca y se abre con los nombres completos); se ve el código de 2 letras */
+  .app-header .lang-select .select { width: 4.25rem; min-height: 44px; padding: 6px 22px 6px 8px; font-size: 14px; color: transparent; }
+  .app-header .lang-select .select option { color: var(--text); }
+  .app-header .lang-select__code {
+    display: flex; align-items: center; position: absolute; inset: 0 12px 0 10px;
+    font-size: 14px; font-weight: 700; pointer-events: none;
+  }
+  /* Flecha del desplegable (la nativa se ve con el color del texto, que aquí es transparente) */
+  .app-header .lang-select__code::after {
+    content: ''; width: 6px; height: 6px; margin: -3px 0 0 auto;
+    border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg);
+  }
+  #logout-btn { min-width: 44px; padding: 0 10px; }
   .card-head, .card-body, .card-pad { padding-left: 16px; padding-right: 16px; }
   .table th:first-child, .table td:first-child { padding-left: 16px; }
   .editor-area { padding: 20px 16px; }

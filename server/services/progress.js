@@ -94,6 +94,11 @@ async function afterApproval(client, teamId, levelId, userId) {
     title: next ? `¡Se desbloqueó el nivel ${next.position}: ${next.name}!` : '¡Completaron todos los niveles del documento!',
     body: `Superaron el nivel ${lv.position} · ${lv.name} y ganaron ${lv.points} puntos.`,
     link: '/estudiante/tablero.html',
+    msgKey: next ? 'level.unlocked' : 'level.allDone',
+    params: {
+      n: lv.position, level: lv.name, points: lv.points,
+      ...(next && { nextN: next.position, nextLevel: next.name }),
+    },
   });
 }
 

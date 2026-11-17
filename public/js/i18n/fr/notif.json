@@ -1,0 +1,24 @@
+{
+  "notif": {
+    "revision": {
+      "submitted": { "title": "{team} a soumis « {section} » à la relecture", "body": "{user} a terminé la section et attend votre relecture." },
+      "approved": { "title": "« {section} » a été approuvée", "body": "Relue par {reviewer}." },
+      "approvedNote": { "title": "« {section} » a été approuvée", "body": "{reviewer} : « {note} »" },
+      "returned": { "title": "« {section} » a été renvoyée avec des observations", "body": "{reviewer} : « {note} »" }
+    },
+    "comment": {
+      "new": { "title": "Nouveau commentaire sur « {section} »", "body": "{user} : « {excerpt} »" },
+      "reply": { "title": "{user} a répondu sur « {section} »", "body": "{user} : « {excerpt} »" }
+    },
+    "team": {
+      "added": { "title": "Vous avez rejoint {team}", "body": "Vous faites désormais partie de {team} pour la période {period}." }
+    },
+    "level": {
+      "unlocked": { "title": "Le niveau {nextN} est débloqué : {nextLevel} !", "body": "Vous avez terminé le niveau {n} · {level} et gagné {points} points." },
+      "allDone": { "title": "Vous avez terminé tous les niveaux du document !", "body": "Vous avez terminé le niveau {n} · {level} et gagné {points} points." }
+    },
+    "badge": {
+      "earned": { "title": "Vous avez obtenu le badge « {name} » !", "body": "{description} · +{points} points" }
+    }
+  }
+}

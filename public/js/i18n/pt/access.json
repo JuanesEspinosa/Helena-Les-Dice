@@ -1,0 +1,71 @@
+{
+  "access": {
+    "brand": {
+      "label": "Apresentação da plataforma",
+      "lead": "Construa o documento do seu projeto por níveis, com papéis claros para a sua equipe e feedback do seu professor no momento certo.",
+      "levelsLabel": "Os cinco níveis do documento IEEE 830",
+      "level1": "Introdução",
+      "level2": "Descrição geral",
+      "level3": "Requisitos específicos",
+      "level4": "Design do projeto",
+      "level5": "Anexos",
+      "benefit1Title": "Níveis por sprints",
+      "benefit1Text": "Cada nível é desbloqueado quando o anterior é aprovado.",
+      "benefit2Title": "Contribuições de cada membro",
+      "benefit2Text": "Cada edição fica registrada no histórico.",
+      "benefit3Title": "Conquistas da equipe",
+      "benefit3Text": "Pontos e insígnias ao aprovar seções."
+    },
+    "privacy": "Seus dados são tratados de acordo com a Lei 1581 de 2012 e as políticas do POLI JIC.",
+    "emailLabel": "E-mail institucional",
+    "emailPlaceholder": "nome_sobrenome@elpoli.edu.co",
+    "emailRequired": "Informe seu e-mail institucional.",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha",
+    "login": {
+      "pageTitle": "Entrar · Helena les dice",
+      "title": "Entrar",
+      "lead": "Acesse com seu e-mail institucional.",
+      "password": "Senha",
+      "forgot": "Esqueceu sua senha?",
+      "submit": "Entrar",
+      "idleNote": "Por segurança, a sessão é encerrada automaticamente após 30 minutos sem atividade.",
+      "passwordRequired": "Informe sua senha.",
+      "passwordReset": "Sua senha foi atualizada. Você já pode entrar.",
+      "loginToContinue": "Entre para continuar.",
+      "attemptsLeft": {
+        "one": "Resta {count} tentativa antes do bloqueio de {minutes} minutos.",
+        "other": "Restam {count} tentativas antes do bloqueio de {minutes} minutos."
+      }
+    },
+    "recover": {
+      "pageTitle": "Recuperar senha · Helena les dice",
+      "back": "Voltar para o login",
+      "step": "Etapa {n} de {total}",
+      "title": "Esqueceu sua senha?",
+      "lead": "Informe seu e-mail institucional e enviaremos um link para você criar uma nova.",
+      "send": "Enviar link",
+      "sentTitle": "Confira seu e-mail",
+      "sentText": "Se o e-mail estiver correto, você receberá um link para redefinir sua senha. O link é válido por 1 hora.",
+      "sentSpam": "Não recebeu? Confira a pasta de spam.",
+      "resend": "Enviar novamente",
+      "otherEmail": "Usar outro e-mail",
+      "resent": "Enviamos um novo link, caso o e-mail esteja correto.",
+      "invalidTitle": "Link inválido",
+      "restart": "Solicitar um novo link",
+      "newTitle": "Crie sua nova senha",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Confirmar senha",
+      "saveAndLogin": "Salvar e entrar"
+    },
+    "rules": {
+      "label": "Requisitos da senha",
+      "len": "Mínimo de 8 caracteres",
+      "num": "Inclui pelo menos um número",
+      "same": "As duas senhas coincidem",
+      "met": "(atendido)",
+      "pending": "(pendente)",
+      "notMet": "A senha ainda não atende a todos os requisitos."
+    }
+  }
+}

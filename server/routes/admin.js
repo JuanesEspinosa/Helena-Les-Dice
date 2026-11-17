@@ -88,18 +88,18 @@ function tempPassword() {
 function userInput(body) {
   const name = requireText(body.name, 'name', 'El nombre', 120);
   const email = requireEmail(body.email);
-  if (!ROLES.includes(body.role)) throw new HttpError(400, 'Selecciona un tipo de usuario válido.', 'role');
+  if (!ROLES.includes(body.role)) throw new HttpError(400, 'Selecciona un tipo de usuario válido.', 'role', { code: 'ROLE_INVALID' });
   return { name, email, role: body.role };
 }
 
 async function ensureEmailFree(client, email, exceptId = 0) {
   const { rows } = await client.query('SELECT 1 FROM users WHERE lower(email) = $1 AND id <> $2', [email, exceptId]);
-  if (rows.length) throw new HttpError(409, 'Ya existe una cuenta con este correo.', 'email');
+  if (rows.length) throw new HttpError(409, 'Ya existe una cuenta con este correo.', 'email', { code: 'EMAIL_TAKEN' });
 }
 
 async function findUser(client, id) {
   const { rows } = await client.query('SELECT id, name, email, role, active FROM users WHERE id = $1', [id]);
-  if (!rows[0]) throw new HttpError(404, 'La cuenta no existe.');
+  if (!rows[0]) throw new HttpError(404, 'La cuenta no existe.', undefined, { code: 'USER_NOT_FOUND' });
   return rows[0];
 }
 
@@ -157,7 +157,7 @@ router.put('/users/:id', ah(async (req, res) => {
   const id = idParam(req);
   const data = userInput(req.body);
   if (id === me(req).id && data.role !== 'administrador') {
-    throw new HttpError(400, 'No puedes quitarte a ti mismo el rol de administrador.', 'role');
+    throw new HttpError(400, 'No puedes quitarte a ti mismo el rol de administrador.', 'role', { code: 'SELF_ROLE_CHANGE' });
   }
   const user = await tx(async (client) => {
     await findUser(client, id);
@@ -175,7 +175,7 @@ router.put('/users/:id', ah(async (req, res) => {
 
 async function setActive(req, active) {
   const id = idParam(req);
-  if (!active && id === me(req).id) throw new HttpError(400, 'No puedes desactivar tu propia cuenta.');
+  if (!active && id === me(req).id) throw new HttpError(400, 'No puedes desactivar tu propia cuenta.', undefined, { code: 'SELF_DEACTIVATE' });
   return tx(async (client) => {
     const u = await findUser(client, id);
     await client.query('UPDATE users SET active = $1, failed_attempts = 0, locked_until = NULL WHERE id = $2', [active, id]);
@@ -191,12 +191,12 @@ router.post('/users/:id/reactivate', ah(async (req, res) => res.json(await setAc
 
 router.delete('/users/:id', ah(async (req, res) => {
   const id = idParam(req);
-  if (id === me(req).id) throw new HttpError(400, 'No puedes eliminar tu propia cuenta.');
+  if (id === me(req).id) throw new HttpError(400, 'No puedes eliminar tu propia cuenta.', undefined, { code: 'SELF_DELETE' });
   await tx(async (client) => {
     const u = await findUser(client, id);
     const { rows } = await client.query(`SELECT ${HAS_CONTRIBUTIONS} AS has FROM users u WHERE u.id = $1`, [id]);
     if (rows[0].has) {
-      throw new HttpError(409, 'La cuenta tiene aportes registrados; solo se puede desactivar para conservar el historial.');
+      throw new HttpError(409, 'La cuenta tiene aportes registrados; solo se puede desactivar para conservar el historial.', undefined, { code: 'USER_HAS_CONTRIBUTIONS' });
     }
     await client.query('SAVEPOINT del_user');
     try {
@@ -204,7 +204,7 @@ router.delete('/users/:id', ah(async (req, res) => {
     } catch (err) {
       if (err.code !== '23503') throw err;
       await client.query('ROLLBACK TO SAVEPOINT del_user');
-      throw new HttpError(409, 'La cuenta está vinculada a equipos o a registros de acceso; solo se puede desactivar para conservar el historial.');
+      throw new HttpError(409, 'La cuenta está vinculada a equipos o a registros de acceso; solo se puede desactivar para conservar el historial.', undefined, { code: 'USER_HAS_LINKS' });
     }
     await logActivity(client, { userId: me(req).id, action: 'elimino_usuario', detail: u.email });
   });
@@ -236,7 +236,7 @@ const PERIOD_COLS = `p.id, p.name, to_char(p.start_date, 'YYYY-MM-DD') AS start_
 function validDate(value, field, label) {
   const ok = typeof value === 'string' && DATE_RE.test(value) && !Number.isNaN(Date.parse(value + 'T00:00:00Z'))
     && new Date(value + 'T00:00:00Z').toISOString().startsWith(value);
-  if (!ok) throw new HttpError(400, `${label} no es válida.`, field);
+  if (!ok) throw new HttpError(400, `${label} no es válida.`, field, { code: 'DATE_INVALID' });
   return value;
 }
 
@@ -244,13 +244,13 @@ function periodInput(body) {
   const name = requireText(body.name, 'name', 'El nombre del periodo', 20);
   const start = validDate(body.start_date, 'start_date', 'La fecha de inicio');
   const end = validDate(body.end_date, 'end_date', 'La fecha de fin');
-  if (end <= start) throw new HttpError(400, 'La fecha de fin debe ser posterior a la de inicio.', 'end_date');
+  if (end <= start) throw new HttpError(400, 'La fecha de fin debe ser posterior a la de inicio.', 'end_date', { code: 'PERIOD_DATES_INVALID' });
   return { name, start, end, active: body.active === true || body.active === 'true' || body.active === 'on' };
 }
 
 async function ensurePeriodNameFree(client, name, exceptId = 0) {
   const { rows } = await client.query('SELECT 1 FROM periods WHERE lower(name) = lower($1) AND id <> $2', [name, exceptId]);
-  if (rows.length) throw new HttpError(409, `Ya existe un periodo con el nombre ${name}.`, 'name');
+  if (rows.length) throw new HttpError(409, `Ya existe un periodo con el nombre ${name}.`, 'name', { code: 'PERIOD_NAME_TAKEN', params: { name } });
 }
 
 async function findPeriod(client, id) {
@@ -258,7 +258,7 @@ async function findPeriod(client, id) {
     `SELECT ${PERIOD_COLS}, (SELECT COUNT(*) FROM teams t WHERE t.period_id = p.id)::int AS teams FROM periods p WHERE p.id = $1`,
     [id]
   );
-  if (!rows[0]) throw new HttpError(404, 'El periodo no existe.');
+  if (!rows[0]) throw new HttpError(404, 'El periodo no existe.', undefined, { code: 'PERIOD_NOT_FOUND' });
   return rows[0];
 }
 
@@ -317,7 +317,7 @@ router.delete('/periods/:id', ah(async (req, res) => {
     const p = await findPeriod(client, id);
     if (p.teams > 0) {
       const n = p.teams === 1 ? '1 equipo' : `${p.teams} equipos`;
-      throw new HttpError(409, `No se puede eliminar el periodo ${p.name} porque tiene ${n} con avances registrados. Puedes dejarlo inactivo para conservar el historial.`);
+      throw new HttpError(409, `No se puede eliminar el periodo ${p.name} porque tiene ${n} con avances registrados. Puedes dejarlo inactivo para conservar el historial.`, undefined, { code: 'PERIOD_HAS_PROGRESS', params: { name: p.name, count: p.teams } });
     }
     await client.query('DELETE FROM periods WHERE id = $1', [id]);
     await logActivity(client, { userId: me(req).id, action: 'elimino_periodo', detail: p.name });
@@ -334,17 +334,17 @@ function validIcon(value) {
   if (typeof value !== 'string' || !value) return 'medal';
   if (ICON_NAMES.has(value)) return value;
   const m = /^data:image\/(png|svg\+xml);base64,([A-Za-z0-9+/]+={0,2})$/.exec(value);
-  if (!m) throw new HttpError(400, 'El ícono debe ser una imagen PNG o SVG.', 'icon');
+  if (!m) throw new HttpError(400, 'El ícono debe ser una imagen PNG o SVG.', 'icon', { code: 'ICON_TYPE_INVALID' });
   const buf = Buffer.from(m[2], 'base64');
-  if (buf.length > MAX_ICON_BYTES) throw new HttpError(400, 'El ícono supera el máximo de 200 KB.', 'icon');
+  if (buf.length > MAX_ICON_BYTES) throw new HttpError(400, 'El ícono supera el máximo de 200 KB.', 'icon', { code: 'ICON_TOO_LARGE', params: { max: MAX_ICON_BYTES / 1024 } });
   if (m[1] === 'png' && buf.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') {
-    throw new HttpError(400, 'El archivo no es una imagen PNG válida.', 'icon');
+    throw new HttpError(400, 'El archivo no es una imagen PNG válida.', 'icon', { code: 'ICON_PNG_INVALID' });
   }
   if (m[1] === 'svg+xml') {
     const svg = buf.toString('utf8');
-    if (!/<svg[\s>]/i.test(svg)) throw new HttpError(400, 'El archivo no es una imagen SVG válida.', 'icon');
+    if (!/<svg[\s>]/i.test(svg)) throw new HttpError(400, 'El archivo no es una imagen SVG válida.', 'icon', { code: 'ICON_SVG_INVALID' });
     if (/<script/i.test(svg) || /\son\w+\s*=/i.test(svg) || /javascript:/i.test(svg)) {
-      throw new HttpError(400, 'El SVG contiene código no permitido.', 'icon');
+      throw new HttpError(400, 'El SVG contiene código no permitido.', 'icon', { code: 'ICON_SVG_UNSAFE' });
     }
   }
   return value;
@@ -355,21 +355,21 @@ function achievementInput(body) {
   const description = typeof body.description === 'string' ? body.description.trim().slice(0, 500) : '';
   const icon = validIcon(body.icon);
   if (!Object.prototype.hasOwnProperty.call(CRITERIA, body.criterion)) {
-    throw new HttpError(400, 'Selecciona un criterio válido.', 'criterion');
+    throw new HttpError(400, 'Selecciona un criterio válido.', 'criterion', { code: 'CRITERION_INVALID' });
   }
   let param = 0;
   if (PARAM_CRITERIA.includes(body.criterion)) {
     param = requireInt(body.param, 'param', 'El valor N');
-    if (param < 1 || param > 1000) throw new HttpError(400, 'El valor N debe estar entre 1 y 1000.', 'param');
+    if (param < 1 || param > 1000) throw new HttpError(400, 'El valor N debe estar entre 1 y 1000.', 'param', { code: 'PARAM_RANGE', params: { min: 1, max: 1000 } });
   }
   const points = requireInt(body.points, 'points', 'Los puntos');
-  if (points < 0 || points > 10000) throw new HttpError(400, 'Los puntos deben estar entre 0 y 10000.', 'points');
+  if (points < 0 || points > 10000) throw new HttpError(400, 'Los puntos deben estar entre 0 y 10000.', 'points', { code: 'POINTS_INVALID', params: { max: 10000 } });
   return { name, description, icon, criterion: body.criterion, param, points };
 }
 
 async function ensureAchievementNameFree(client, name, exceptId = 0) {
   const { rows } = await client.query('SELECT 1 FROM achievements WHERE lower(name) = lower($1) AND id <> $2', [name, exceptId]);
-  if (rows.length) throw new HttpError(409, 'Ya existe un logro con ese nombre.', 'name');
+  if (rows.length) throw new HttpError(409, 'Ya existe un logro con ese nombre.', 'name', { code: 'ACHIEVEMENT_NAME_TAKEN' });
 }
 
 const ACH_SELECT = `SELECT a.id, a.name, a.description, a.icon, a.criterion, a.param, a.points, a.created_at,
@@ -404,7 +404,7 @@ router.put('/achievements/:id', ah(async (req, res) => {
       `UPDATE achievements SET name = $1, description = $2, icon = $3, criterion = $4, param = $5, points = $6 WHERE id = $7`,
       [d.name, d.description, d.icon, d.criterion, d.param, d.points, id]
     );
-    if (!rowCount) throw new HttpError(404, 'El logro no existe.');
+    if (!rowCount) throw new HttpError(404, 'El logro no existe.', undefined, { code: 'ACHIEVEMENT_NOT_FOUND' });
     await logActivity(client, { userId: me(req).id, action: 'edito_logro', detail: d.name });
     return (await client.query(`${ACH_SELECT} WHERE a.id = $1`, [id])).rows[0];
   });
@@ -415,7 +415,7 @@ router.delete('/achievements/:id', ah(async (req, res) => {
   const id = idParam(req);
   const teams = await tx(async (client) => {
     const { rows } = await client.query(`${ACH_SELECT} WHERE a.id = $1`, [id]);
-    if (!rows[0]) throw new HttpError(404, 'El logro no existe.');
+    if (!rows[0]) throw new HttpError(404, 'El logro no existe.', undefined, { code: 'ACHIEVEMENT_NOT_FOUND' });
     await client.query('DELETE FROM achievements WHERE id = $1', [id]); // team_achievements se borra en cascada
     await logActivity(client, { userId: me(req).id, action: 'elimino_logro', detail: `${rows[0].name} (${rows[0].teams} equipos)` });
     return rows[0].teams;
@@ -439,10 +439,10 @@ router.get('/backups', ah(async (_req, res) => {
 
 router.post('/backups', ah(async (req, res) => {
   const password = typeof req.body.password === 'string' ? req.body.password : '';
-  if (!password) throw new HttpError(400, 'Escribe tu contraseña para confirmar.', 'password');
+  if (!password) throw new HttpError(400, 'Escribe tu contraseña para confirmar.', 'password', { code: 'PASSWORD_CONFIRM_REQUIRED' });
   const row = await one('SELECT password_hash FROM users WHERE id = $1', [me(req).id]);
   if (!row || !(await bcrypt.compare(password, row.password_hash))) {
-    throw new HttpError(401, 'La contraseña no es correcta.', 'password');
+    throw new HttpError(401, 'La contraseña no es correcta.', 'password', { code: 'PASSWORD_WRONG' });
   }
   const backup = await createBackup({ kind: 'manual', userId: me(req).id });
   await tx((client) => logActivity(client, { userId: me(req).id, action: 'genero_backup', detail: backup.filename }));
@@ -453,7 +453,7 @@ router.get('/backups/:id/download', ah(async (req, res) => {
   const id = idParam(req);
   const row = await one('SELECT filename FROM backups WHERE id = $1', [id]);
   const file = row && backupFilePath(row.filename);
-  if (!file) throw new HttpError(404, 'El archivo de esta copia ya no está disponible en el servidor.');
+  if (!file) throw new HttpError(404, 'El archivo de esta copia ya no está disponible en el servidor.', undefined, { code: 'BACKUP_FILE_MISSING' });
   res.download(file, row.filename, { headers: { 'Content-Type': 'application/gzip' } });
 }));
 

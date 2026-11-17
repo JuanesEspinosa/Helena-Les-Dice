@@ -1,0 +1,165 @@
+{
+  "common": {
+    "subject": "Gestion de projets informatiques",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "loading": "Chargement",
+    "section": "Section",
+    "responsible": "Responsable",
+    "reviewer": "Relecteur",
+    "status": "Statut",
+    "action": "Action",
+    "unassigned": "Non attribuée",
+    "open": "Ouvrir",
+    "openNamed": "Ouvrir {name}",
+    "seeAll": "Tout afficher",
+    "retry": "Réessayer",
+    "back": "Retour",
+    "breadcrumb": "Fil d’Ariane",
+    "comments": "Commentaires",
+    "reply": "Répondre",
+    "noChanges": "Aucune modification à enregistrer.",
+    "levelN": "Niveau {n}",
+    "levelNamed": "Niveau {n} · {name}",
+    "plusPoints": {
+      "one": "+{count} point",
+      "other": "+{count} points"
+    },
+    "actions": "Actions",
+    "edit": "Modifier",
+    "saveChanges": "Enregistrer les modifications",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "saved": "Les modifications ont été enregistrées.",
+    "cannotUndo": "Cette action est irréversible.",
+    "understood": "J’ai compris"
+  },
+  "lang": {
+    "label": "Langue"
+  },
+  "status": {
+    "redaccion": "En rédaction",
+    "revision": "En relecture",
+    "aprobado": "Approuvée",
+    "devuelto": "Renvoyée"
+  },
+  "time": {
+    "never": "Aucune activité",
+    "justNow": "À l’instant",
+    "todayAt": "Aujourd’hui, {time}",
+    "yesterdayAt": "Hier, {time}"
+  },
+  "roles": {
+    "estudiante": "Étudiant",
+    "docente": "Enseignant",
+    "administrador": "Administrateur"
+  },
+  "menu": {
+    "estudiante": {
+      "tablero": "Tableau des niveaux",
+      "integrantes": "Membres",
+      "logros": "Succès et badges",
+      "historial": "Historique des versions"
+    },
+    "docente": {
+      "panel": "Tableau de suivi",
+      "equipos": "Équipes",
+      "niveles": "Configurer les niveaux",
+      "comentarios": "Commentaires"
+    },
+    "administrador": {
+      "panel": "Tableau de bord",
+      "usuarios": "Utilisateurs",
+      "periodos": "Périodes académiques",
+      "logros": "Catalogue des succès",
+      "backups": "Sauvegardes"
+    }
+  },
+  "layout": {
+    "subtitle": "{subject} · {detail}",
+    "noTeam": "Aucune équipe",
+    "teacherPanel": "Espace enseignant",
+    "adminSubtitle": "Administration de la plateforme",
+    "openMenu": "Ouvrir le menu",
+    "mainMenu": "Menu principal",
+    "notifications": "Notifications",
+    "notificationsUnread": {
+      "one": "Notifications, {count} non lue",
+      "other": "Notifications, {count} non lues"
+    },
+    "myProfile": "Mon profil",
+    "logout": "Se déconnecter",
+    "progress": "Avancement du document",
+    "approvedOf": {
+      "one": "{approved} sur {count} section approuvée",
+      "other": "{approved} sur {count} sections approuvées"
+    }
+  },
+  "titles": {
+    "studentBoard": "Tableau des niveaux · Helena les dice",
+    "studentMembers": "Membres · Helena les dice",
+    "studentAchievements": "Succès et badges · Helena les dice",
+    "studentHistory": "Historique des versions · Helena les dice",
+    "editor": "Éditeur de section · Helena les dice",
+    "teacherPanel": "Tableau de suivi · Helena les dice",
+    "teacherTeams": "Équipes · Helena les dice",
+    "teacherTeam": "Détail de l’équipe · Helena les dice",
+    "teacherLevels": "Configurer les niveaux · Helena les dice",
+    "teacherComments": "Commentaires · Helena les dice",
+    "adminPanel": "Tableau de bord de l’administrateur · Helena les dice",
+    "adminUsers": "Utilisateurs · Helena les dice",
+    "adminPeriods": "Périodes académiques · Helena les dice",
+    "adminAchievements": "Catalogue des succès · Helena les dice",
+    "adminBackups": "Sauvegardes · Helena les dice",
+    "profile": "Mon profil · Helena les dice",
+    "notifications": "Notifications · Helena les dice"
+  },
+  "account": {
+    "backToBoard": "Retour au tableau",
+    "backToPanel": "Retour au tableau de bord",
+    "profile": {
+      "firstTitle": "Vous devez changer votre mot de passe temporaire.",
+      "firstText": "Par sécurité, créez votre propre mot de passe avant de continuer à utiliser la plateforme.",
+      "noTeam": "Aucune équipe attribuée",
+      "memberSince": "Membre depuis",
+      "lastLogin": "Dernière connexion",
+      "language": "Langue de l’interface",
+      "contactAdmin": "Pour modifier votre nom ou votre adresse e-mail, contactez l’administrateur.",
+      "changePassword": "Changer le mot de passe",
+      "passwordHint": "8 caractères minimum, dont au moins un chiffre.",
+      "confirmNew": "Confirmer le nouveau mot de passe",
+      "updatePassword": "Mettre à jour le mot de passe",
+      "session": "Session",
+      "sessionText": "Votre session se ferme automatiquement après 30 minutes d’inactivité.",
+      "passwordUpdated": "Votre mot de passe a bien été mis à jour.",
+      "firstDone": "C’est fait : votre mot de passe est désormais personnel.",
+      "continueHome": "Continuer vers mon accueil"
+    },
+    "notifications": {
+      "types": {
+        "devuelta": "Section renvoyée",
+        "comentario": "Nouveau commentaire",
+        "aprobada": "Section approuvée",
+        "nivel": "Niveau débloqué",
+        "insignia": "Badge obtenu",
+        "revision": "Section en relecture",
+        "other": "Avis"
+      },
+      "today": "Aujourd’hui",
+      "thisWeek": "Cette semaine",
+      "earlier": "Plus anciennes",
+      "unreadOne": "Non lue",
+      "upToDate": "Vous êtes à jour",
+      "noUnread": "Vous n’avez aucune notification non lue.",
+      "emptyTitle": "Vous n’avez encore aucune notification",
+      "emptyText": "Vous verrez ici les relectures, les commentaires et les succès de votre équipe.",
+      "all": "Toutes",
+      "unread": "Non lues",
+      "unreadCount": "Non lues ({count})",
+      "allRead": "Toutes les notifications ont été marquées comme lues.",
+      "noneToRead": "Vous n’aviez aucune notification non lue.",
+      "markAll": "Tout marquer comme lu",
+      "filter": "Filtrer les notifications"
+    }
+  }
+}

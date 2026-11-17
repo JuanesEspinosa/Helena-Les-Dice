@@ -2,19 +2,23 @@
 import { get, post } from '../core/api.js';
 import { html, safe, icon, ago, toast, withBusy, emptyState, loading } from '../core/ui.js';
 import { initLayout, setMain } from '../core/layout.js';
+import { t, has } from '../core/i18n.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEK_DAYS = 7;
 
-/** Ícono y texto accesible por tipo de aviso; el color sale de .notif__icon--<tipo>. */
-const TYPES = {
-  devuelta: { icon: 'undo', label: 'Sección devuelta' },
-  comentario: { icon: 'message', label: 'Comentario nuevo' },
-  aprobada: { icon: 'checkCircle', label: 'Sección aprobada' },
-  nivel: { icon: 'layers', label: 'Nivel desbloqueado' },
-  insignia: { icon: 'medal', label: 'Insignia ganada' },
-  revision: { icon: 'eye', label: 'Sección en revisión' },
-};
+/** Ícono por tipo de aviso; el texto accesible sale de account.notifications.types.<tipo>. */
+const TYPE_ICONS = { devuelta: 'undo', comentario: 'message', aprobada: 'checkCircle', nivel: 'layers', insignia: 'medal', revision: 'eye' };
+
+/**
+ * Título y cuerpo del aviso: notif.<msg_key>.title|body con sus params. Si el aviso es antiguo
+ * (sin msg_key) o falta la clave, se muestra lo que guardó el servidor en español.
+ */
+function notifText(n) {
+  const base = n.msg_key ? `notif.${n.msg_key}` : '';
+  const pick = (part, fallback) => (base && has(`${base}.${part}`) ? t(`${base}.${part}`, n.params || {}) : fallback);
+  return { title: pick('title', n.title), body: pick('body', n.body) };
+}
 
 const state = { filter: 'all', items: [], unread: 0 };
 
@@ -29,9 +33,9 @@ function groupByDate(items) {
   today.setHours(0, 0, 0, 0);
   const weekStart = new Date(today.getTime() - (WEEK_DAYS - 1) * DAY_MS);
   const groups = [
-    { title: 'Hoy', items: [] },
-    { title: 'Esta semana', items: [] },
-    { title: 'Anteriores', items: [] },
+    { title: t('account.notifications.today'), items: [] },
+    { title: t('account.notifications.thisWeek'), items: [] },
+    { title: t('account.notifications.earlier'), items: [] },
   ];
   items.forEach((n) => {
     const d = new Date(n.created_at);
@@ -42,16 +46,17 @@ function groupByDate(items) {
 }
 
 function notifItem(n) {
-  const type = TYPES[n.type] || { icon: 'bell', label: 'Aviso' };
+  const typeKey = TYPE_ICONS[n.type] ? n.type : 'other';
+  const { title, body } = notifText(n);
   const href = safeLink(n.link);
   const inner = html`
-    <span class="notif__icon notif__icon--${n.type}" role="img" aria-label="${type.label}">${icon(type.icon, 20)}</span>
+    <span class="notif__icon notif__icon--${n.type}" role="img" aria-label="${t(`account.notifications.types.${typeKey}`)}">${icon(TYPE_ICONS[n.type] || 'bell', 20)}</span>
     <span class="notif__text">
-      <span class="notif__title">${n.title}</span>
-      ${n.body ? safe(html`<span class="notif__body">${n.body}</span>`) : ''}
+      <span class="notif__title">${title}</span>
+      ${body ? safe(html`<span class="notif__body">${body}</span>`) : ''}
       <span class="notif__when">${ago(n.created_at)}</span>
     </span>
-    ${n.read ? '' : safe('<span class="notif__dot" role="img" aria-label="No leída"></span>')}`;
+    ${n.read ? '' : safe(html`<span class="notif__dot" role="img" aria-label="${t('account.notifications.unreadOne')}"></span>`)}`;
   const cls = `notif${n.read ? '' : ' notif--unread'}`;
   return href
     ? safe(html`<a class="${cls}" href="${href}" data-id="${n.id}">${safe(inner)}</a>`)
@@ -61,8 +66,8 @@ function notifItem(n) {
 function listHtml() {
   if (state.items.length === 0) {
     return state.filter === 'unread'
-      ? emptyState('checkCircle', 'Estás al día', 'No tienes avisos sin leer.')
-      : emptyState('bell', 'Todavía no tienes notificaciones', 'Aquí verás las revisiones, los comentarios y los logros de tu equipo.');
+      ? emptyState('checkCircle', t('account.notifications.upToDate'), t('account.notifications.noUnread'))
+      : emptyState('bell', t('account.notifications.emptyTitle'), t('account.notifications.emptyText'));
   }
   return safe(groupByDate(state.items).map((g, i) => html`
     <section class="notif-group" aria-labelledby="g${i}">
@@ -72,7 +77,10 @@ function listHtml() {
 }
 
 function paint() {
-  const filters = [['all', 'Todas'], ['unread', state.unread ? `No leídas (${state.unread})` : 'No leídas']];
+  const filters = [
+    ['all', t('account.notifications.all')],
+    ['unread', state.unread ? t('account.notifications.unreadCount', { count: state.unread }) : t('account.notifications.unread')],
+  ];
   document.getElementById('filters').innerHTML = filters
     .map(([key, label]) => html`<button type="button" data-filter="${key}" aria-pressed="${state.filter === key}">${label}</button>`)
     .join('');
@@ -124,7 +132,7 @@ async function onReadAll(event) {
     try {
       const { updated } = await post('/account/notifications/read-all');
       changed();
-      toast(updated ? 'Marcaste todos los avisos como leídos.' : 'No tenías avisos sin leer.');
+      toast(t(updated ? 'account.notifications.allRead' : 'account.notifications.noneToRead'));
       await load();
     } catch (err) {
       toast(err.message, 'error');
@@ -141,17 +149,17 @@ function onFilterClick(event) {
 
 async function main() {
   const { home, user } = await initLayout({});
-  const back = user.role === 'estudiante' ? 'Volver al tablero' : 'Volver al panel';
+  const back = t(user.role === 'estudiante' ? 'account.backToBoard' : 'account.backToPanel');
   setMain(html`
     <div class="notif-page">
       <div class="page-head">
         <div>
           <a class="back-link" href="${home}">${icon('arrowLeft', 18)}${back}</a>
-          <h1 class="page-title" style="margin-top:6px">Notificaciones</h1>
+          <h1 class="page-title" style="margin-top:6px">${t('layout.notifications')}</h1>
         </div>
-        <button type="button" class="btn btn-outline" id="read-all" disabled>${icon('check', 18)}Marcar todas como leídas</button>
+        <button type="button" class="btn btn-outline" id="read-all" disabled>${icon('check', 18)}${t('account.notifications.markAll')}</button>
       </div>
-      <div class="segmented" id="filters" style="align-self:flex-start" role="group" aria-label="Filtrar notificaciones"></div>
+      <div class="segmented" id="filters" style="align-self:flex-start" role="group" aria-label="${t('account.notifications.filter')}"></div>
       <div id="list" class="stack" style="gap:20px"></div>
     </div>`);
   document.getElementById('filters').addEventListener('click', onFilterClick);

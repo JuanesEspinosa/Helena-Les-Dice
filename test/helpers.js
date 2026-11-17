@@ -98,10 +98,11 @@ function client(base) {
     get: (url) => request('GET', url),
     post: (url, body = {}) => request('POST', url, body),
     put: (url, body = {}) => request('PUT', url, body),
+    patch: (url, body = {}) => request('PATCH', url, body),
     // Igual que public/js/core/api.js: el servidor exige JSON en toda petición que modifica datos
     del: (url) => request('DELETE', url, {}),
     login: (email, password = PASSWORD) => request('POST', '/api/auth/login', { email, password }),
   };
 }
 
-module.exports = { startApp, client, PASSWORD };
+module.exports = { startApp, client, testDatabaseUrl, PASSWORD };

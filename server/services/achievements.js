@@ -65,6 +65,8 @@ async function evaluateAchievements(client, teamId, userId) {
       title: `¡Ganaron la insignia "${a.name}"!`,
       body: `${a.description} · +${a.points} puntos`,
       link: '/estudiante/logros.html',
+      msgKey: 'badge.earned',
+      params: { name: a.name, description: a.description, points: a.points },
     });
   }
   return earned;
