@@ -90,6 +90,8 @@ async function submitSection(user, sectionId, rawContent) {
       title: `${section.team_name} envió "${section.name}" a revisión`,
       body: `${user.name} terminó la sección y espera tu revisión.`,
       link: `/editor.html?id=${sectionId}`,
+      msgKey: 'revision.submitted',
+      params: { team: section.team_name, section: section.name, user: user.name },
     });
     await evaluateAchievements(client, section.team_id, user.id);
     return { status: 'revision' };
@@ -129,6 +131,8 @@ async function reviewSection(user, sectionId, decision, observation) {
       title: decision === 'aprobar' ? `"${section.name}" fue aprobada` : `"${section.name}" fue devuelta con observaciones`,
       body: note ? `${user.name}: “${note.slice(0, 160)}”` : `Revisada por ${user.name}.`,
       link: `/editor.html?id=${sectionId}`,
+      msgKey: decision === 'aprobar' ? (note ? 'revision.approvedNote' : 'revision.approved') : 'revision.returned',
+      params: { section: section.name, reviewer: user.name, note: note.slice(0, 160) },
     });
     if (decision === 'aprobar') await afterApproval(client, section.team_id, section.level_id, user.id);
     await evaluateAchievements(client, section.team_id, user.id);

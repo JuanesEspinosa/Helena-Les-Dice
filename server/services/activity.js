@@ -13,17 +13,18 @@ async function logActivity(client, { userId, teamId = null, sectionId = null, ac
 
 /**
  * Crea avisos para varios usuarios. Usa un SAVEPOINT: si falla, el evento original se completa
- * igual (RF-12, situaciones anormales).
+ * igual (RF-12, situaciones anormales). `msgKey` + `params` permiten al front traducir el aviso
+ * (notif.<msgKey>.title|body); `title`/`body` en español quedan como respaldo.
  */
-async function notify(client, userIds, { type, title, body = '', link = '' }) {
+async function notify(client, userIds, { type, title, body = '', link = '', msgKey = null, params = {} }) {
   const ids = [...new Set(userIds.filter(Boolean))];
   if (ids.length === 0) return;
   try {
     await client.query('SAVEPOINT notify_sp');
     await client.query(
-      `INSERT INTO notifications (user_id, type, title, body, link)
-       SELECT unnest($1::int[]), $2, $3, $4, $5`,
-      [ids, type, title, body, link]
+      `INSERT INTO notifications (user_id, type, title, body, link, msg_key, params)
+       SELECT unnest($1::int[]), $2, $3, $4, $5, $6, $7`,
+      [ids, type, title, body, link, msgKey, JSON.stringify(params)]
     );
     await client.query('RELEASE SAVEPOINT notify_sp');
   } catch (err) {

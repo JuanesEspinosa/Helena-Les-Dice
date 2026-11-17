@@ -69,7 +69,7 @@ router.patch('/lang', ah(async (req, res) => {
 router.get('/notifications', ah(async (req, res) => {
   const filter = req.query.filter === 'unread' ? 'unread' : 'all';
   const rows = await query(
-    `SELECT id, type, title, body, link, read, created_at
+    `SELECT id, type, title, body, link, msg_key, params, read, created_at
        FROM notifications
       WHERE user_id = $1 AND ($2::boolean IS FALSE OR NOT read)
       ORDER BY created_at DESC, id DESC

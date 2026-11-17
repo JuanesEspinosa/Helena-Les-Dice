@@ -15,6 +15,8 @@ let app;
 let admin;
 let teacher;
 let student;
+/** Sección que recorre el flujo completo (la usa el test del aviso traducible). */
+let flowSection = null;
 
 before(async () => {
   app = await startApp();
@@ -120,6 +122,7 @@ test('flujo completo de una sección: autoguardado, envío, devolución y aproba
   assert.ok(found, 'el seed debe tener una sección editable con revisor asignado para Laura');
   const id = found.section.id;
   const url = `/api/sections/${id}`;
+  flowSection = found.section;
 
   // Autoguardado sin cambios no crea versión (el editor lo llama cada 2 minutos)
   const same = await student.put(url, { content: found.section.content, auto: true });
@@ -162,6 +165,15 @@ test('flujo completo de una sección: autoguardado, envío, devolución y aproba
   assert.equal((await teacher.post(`${url}/review`, { decision: 'aprobar' })).status, 200);
   assert.equal((await student.get(url)).data.section.status, 'aprobado');
   assert.equal((await student.put(url, { content: '<p>x</p>' })).status, 409, 'una sección aprobada no se edita');
+});
+
+test('tras aprobar una sección, el aviso más reciente del responsable trae msg_key y el nombre de la sección en params', async () => {
+  assert.ok(flowSection, 'depende del test del flujo completo');
+  const r = await student.get('/api/account/notifications');
+  assert.equal(r.status, 200);
+  const latest = r.data.notifications[0];
+  assert.ok(latest.msg_key, `msg_key vacío: ${JSON.stringify(latest)}`);
+  assert.ok(Object.values(latest.params).includes(flowSection.name), JSON.stringify(latest.params));
 });
 
 test('un estudiante que no es responsable no puede editar la sección', async () => {
@@ -244,6 +256,33 @@ test('reordenar niveles guarda el nuevo orden y rechaza órdenes incompletos', a
 
   // Restaura el orden original
   assert.equal((await teacher.put('/api/teacher/levels/order', { ids })).status, 200);
+});
+
+// ---------- Códigos de error estables (el front traduce por code) ----------
+
+test('una ruta de la API que no existe responde 404 con code ROUTE_NOT_FOUND', async () => {
+  const r = await admin.get('/api/no-existe');
+  assert.equal(r.status, 404);
+  assert.equal(r.data.code, 'ROUTE_NOT_FOUND');
+});
+
+test('una petición que modifica datos sin JSON responde 415 con code JSON_REQUIRED', async () => {
+  const r = await fetch(app.base + '/api/auth/login', { method: 'POST', body: 'email=x', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+  assert.equal(r.status, 415);
+  assert.equal((await r.json()).code, 'JSON_REQUIRED');
+});
+
+test('un estudiante en la API de administración recibe 403 con code FORBIDDEN', async () => {
+  const r = await student.get('/api/admin/users');
+  assert.equal(r.status, 403);
+  assert.equal(r.data.code, 'FORBIDDEN');
+});
+
+test('una contraseña incorrecta responde 401 con code AUTH_INVALID y los intentos restantes en params', async () => {
+  const r = await client(app.base).login('mateo.torres@elpoli.edu.co', 'mala');
+  assert.equal(r.status, 401);
+  assert.equal(r.data.code, 'AUTH_INVALID');
+  assert.equal(typeof r.data.params.remaining, 'number');
 });
 
 // ---------- Idioma de la interfaz ----------

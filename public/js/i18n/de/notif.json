@@ -1,1 +1,24 @@
-{}
+{
+  "notif": {
+    "revision": {
+      "submitted": { "title": "{team} submitted “{section}” for review", "body": "{user} finished the section and is waiting for your review." },
+      "approved": { "title": "“{section}” was approved", "body": "Reviewed by {reviewer}." },
+      "approvedNote": { "title": "“{section}” was approved", "body": "{reviewer}: “{note}”" },
+      "returned": { "title": "“{section}” was returned with feedback", "body": "{reviewer}: “{note}”" }
+    },
+    "comment": {
+      "new": { "title": "New comment on “{section}”", "body": "{user}: “{excerpt}”" },
+      "reply": { "title": "{user} replied on “{section}”", "body": "{user}: “{excerpt}”" }
+    },
+    "team": {
+      "added": { "title": "You were added to {team}", "body": "You are now part of {team} in term {period}." }
+    },
+    "level": {
+      "unlocked": { "title": "Level {nextN} unlocked: {nextLevel}!", "body": "You completed level {n} · {level} and earned {points} points." },
+      "allDone": { "title": "You completed every level of the document!", "body": "You completed level {n} · {level} and earned {points} points." }
+    },
+    "badge": {
+      "earned": { "title": "You earned the “{name}” badge!", "body": "{description} · +{points} points" }
+    }
+  }
+}

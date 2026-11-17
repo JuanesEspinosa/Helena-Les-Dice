@@ -145,6 +145,8 @@ router.post('/:id/comments', ah(async (req, res) => {
       title: parent ? `${user.name} respondió en "${section.name}"` : `Nuevo comentario en "${section.name}"`,
       body: `${user.name}: “${body.slice(0, 160)}”`,
       link: `/editor.html?id=${id}`,
+      msgKey: parent ? 'comment.reply' : 'comment.new',
+      params: { user: user.name, section: section.name, excerpt: body.slice(0, 160) },
     });
     await evaluateAchievements(client, section.team_id, user.id);
     return rows[0];

@@ -397,6 +397,8 @@ async function addMembers(client, team, period, studentIds) {
       title: `Te agregaron al ${team.name}`,
       body: `Ahora formas parte del ${team.name} en el periodo ${period.name}.`,
       link: '/estudiante/tablero.html',
+      msgKey: 'team.added',
+      params: { team: team.name, period: period.name },
     });
   }
   return { added, skipped };
