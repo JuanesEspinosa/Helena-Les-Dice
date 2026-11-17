@@ -24,7 +24,8 @@
     "PASSWORD_SHORT": "La contraseña debe tener al menos 8 caracteres.",
     "PASSWORD_NO_DIGIT": "La contraseña debe tener al menos un número.",
     "PASSWORD_LONG": "La contraseña es demasiado larga.",
-    "PASSWORD_MISMATCH": "Las contraseñas no coinciden."
+    "PASSWORD_MISMATCH": "Las contraseñas no coinciden.",
+    "SAME_PERSON": "El responsable y el revisor no pueden ser la misma persona."
   },
   "fields": {
     "generic": "Campo",

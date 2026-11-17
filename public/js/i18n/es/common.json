@@ -3,7 +3,28 @@
     "subject": "Gestión de proyectos TI",
     "confirm": "Confirmar",
     "cancel": "Cancelar",
-    "loading": "Cargando"
+    "loading": "Cargando",
+    "section": "Sección",
+    "responsible": "Responsable",
+    "reviewer": "Revisor",
+    "status": "Estado",
+    "action": "Acción",
+    "unassigned": "Sin asignar",
+    "open": "Abrir",
+    "openNamed": "Abrir {name}",
+    "seeAll": "Ver todas",
+    "retry": "Reintentar",
+    "back": "Volver",
+    "breadcrumb": "Ruta",
+    "comments": "Comentarios",
+    "reply": "Responder",
+    "noChanges": "No había cambios por guardar.",
+    "levelN": "Nivel {n}",
+    "levelNamed": "Nivel {n} · {name}",
+    "plusPoints": {
+      "one": "+{count} punto",
+      "other": "+{count} puntos"
+    }
   },
   "lang": {
     "label": "Idioma"
@@ -54,10 +75,35 @@
     "openMenu": "Abrir menú",
     "mainMenu": "Menú principal",
     "notifications": "Notificaciones",
-    "notificationsUnread": { "one": "Notificaciones, {count} sin leer", "other": "Notificaciones, {count} sin leer" },
+    "notificationsUnread": {
+      "one": "Notificaciones, {count} sin leer",
+      "other": "Notificaciones, {count} sin leer"
+    },
     "myProfile": "Mi perfil",
     "logout": "Cerrar sesión",
     "progress": "Avance del documento",
-    "approvedOf": { "one": "{approved} de {count} sección aprobada", "other": "{approved} de {count} secciones aprobadas" }
+    "approvedOf": {
+      "one": "{approved} de {count} sección aprobada",
+      "other": "{approved} de {count} secciones aprobadas"
+    }
+  },
+  "titles": {
+    "studentBoard": "Tablero de niveles · Helena les dice",
+    "studentMembers": "Integrantes · Helena les dice",
+    "studentAchievements": "Logros e insignias · Helena les dice",
+    "studentHistory": "Historial de versiones · Helena les dice",
+    "editor": "Editor de sección · Helena les dice",
+    "teacherPanel": "Panel de seguimiento · Helena les dice",
+    "teacherTeams": "Equipos · Helena les dice",
+    "teacherTeam": "Detalle de equipo · Helena les dice",
+    "teacherLevels": "Configurar niveles · Helena les dice",
+    "teacherComments": "Comentarios · Helena les dice",
+    "adminPanel": "Panel del administrador · Helena les dice",
+    "adminUsers": "Usuarios · Helena les dice",
+    "adminPeriods": "Periodos académicos · Helena les dice",
+    "adminAchievements": "Catálogo de logros · Helena les dice",
+    "adminBackups": "Copias de seguridad · Helena les dice",
+    "profile": "Mi perfil · Helena les dice",
+    "notifications": "Notificaciones · Helena les dice"
   }
 }

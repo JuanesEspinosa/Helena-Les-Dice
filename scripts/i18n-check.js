@@ -177,6 +177,22 @@ function jsLiterals(src) {
 const blank = (m) => m.replace(/[^\n]/g, ' ');
 const ATTRS_RE = /\b(?:title|aria-label|placeholder|alt)\s*=\s*("([^"]*)"|'([^']*)')/gi;
 
+/**
+ * Textos de un fragmento con HTML, con la misma regla que los archivos .html: el texto visible y
+ * los valores de title, aria-label, placeholder y alt. Las etiquetas, clases, rutas y atributos de
+ * datos (<del>, href="/docente/equipo.html", data-decision="devolver") no son texto de interfaz.
+ * Un trozo de plantilla puede empezar o terminar a mitad de una etiqueta.
+ */
+function htmlTexts(fragment) {
+  const texts = [...fragment.matchAll(ATTRS_RE)].map((m) => m[2] ?? m[3]);
+  const visible = fragment.replace(/<[^>]*>/g, ' ').replace(/<[^>]*$/, ' ').replace(/^[^<]*>/, ' ');
+  texts.push(visible.replace(/&nbsp;|&middot;|&amp;|&[a-z]+;/g, ' '));
+  return texts;
+}
+
+/** Un literal de JS que contiene HTML se revisa como HTML; si no, entero. */
+const jsLiteralIsSpanish = (text) => (/[<>]/.test(text) ? htmlTexts(text).some(isSpanish) : isSpanish(text));
+
 function htmlLiterals(src) {
   const cleaned = src
     .replace(/<!--[\s\S]*?-->/g, blank)
@@ -185,10 +201,7 @@ function htmlLiterals(src) {
   const out = [];
   cleaned.split('\n').forEach((raw, idx) => {
     if (/data-i18n(-attr)?\s*=/.test(raw)) return;
-    const texts = [...raw.matchAll(ATTRS_RE)].map((m) => m[2] ?? m[3]);
-    const visible = raw.replace(/<[^>]*>/g, ' ').replace(/<[^>]*$/, ' ').replace(/^[^<]*>/, ' ');
-    texts.push(visible.replace(/&nbsp;|&middot;|&amp;|&[a-z]+;/g, ' '));
-    texts.filter(isSpanish).forEach((text) => out.push({ text: text.trim(), line: idx + 1 }));
+    htmlTexts(raw).filter(isSpanish).forEach((text) => out.push({ text: text.trim(), line: idx + 1 }));
   });
   return out;
 }
@@ -198,7 +211,7 @@ function checkLiterals(files) {
   for (const file of files) {
     const src = fs.readFileSync(file, 'utf8');
     const rel = path.relative(ROOT, path.resolve(file));
-    const found = file.endsWith('.html') ? htmlLiterals(src) : jsLiterals(src).filter((l) => isSpanish(l.text));
+    const found = file.endsWith('.html') ? htmlLiterals(src) : jsLiterals(src).filter((l) => jsLiteralIsSpanish(l.text));
     found.forEach((l) => failures.push(`${rel}:${l.line}: ${l.text.trim().slice(0, 100)}`));
   }
   failures.forEach((f) => console.log(`  ${f}`));

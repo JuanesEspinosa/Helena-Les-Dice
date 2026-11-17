@@ -202,34 +202,41 @@ async function teamStats(teamId, levels) {
   return { ...st, levels };
 }
 
-/** Avance hacia un logro: { current, target, pct, label } con lo que falta en palabras. */
+/**
+ * Avance hacia un logro: { current, target, pct, label, key } con lo que falta en palabras.
+ * `key` permite al front traducir la frase (student.progress.<key>); `label` es el respaldo en español.
+ */
 function progressOf(a, st) {
-  const of = (current, target, label) => {
+  const of = (current, target, label, key) => {
     const c = Math.min(current, target);
-    return { current: c, target, pct: target ? Math.round((c / target) * 100) : 0, label };
+    return { current: c, target, pct: target ? Math.round((c / target) * 100) : 0, label, key };
   };
   const missing = (n, one1, many) => (n === 1 ? `Falta 1 ${one1}` : `Faltan ${n} ${many}`);
   switch (a.criterion) {
-    case 'first_submission': return of(st.submissions, 1, 'Envíen una sección a revisión');
-    case 'first_approved': return of(st.approved, 1, 'Logren su primera sección aprobada');
+    case 'first_submission': return of(st.submissions, 1, 'Envíen una sección a revisión', 'firstSubmission');
+    case 'first_approved': return of(st.approved, 1, 'Logren su primera sección aprobada', 'firstApproved');
     case 'sections_approved':
-      return of(st.approved, a.param, `${Math.min(st.approved, a.param)} de ${a.param} secciones aprobadas`);
+      return of(st.approved, a.param, `${Math.min(st.approved, a.param)} de ${a.param} secciones aprobadas`, 'sectionsApproved');
     case 'level_completed': {
       const lv = st.levels.find((l) => l.position === a.param);
-      if (!lv) return of(0, 1, 'Nivel no disponible');
+      if (!lv) return of(0, 1, 'Nivel no disponible', 'levelUnavailable');
       const left = lv.total - lv.approved;
-      return of(lv.approved, lv.total || 1, left > 0 ? missing(left, 'sección por aprobar', 'secciones por aprobar') : 'Nivel completo');
+      return left > 0
+        ? of(lv.approved, lv.total || 1, missing(left, 'sección por aprobar', 'secciones por aprobar'), 'sectionsLeft')
+        : of(lv.approved, lv.total || 1, 'Nivel completo', 'levelDone');
     }
     case 'all_levels_completed': {
       const done = st.levels.filter((l) => l.state === 'done').length;
-      return of(done, st.levels.length || 1, `${done} de ${st.levels.length} niveles superados`);
+      return of(done, st.levels.length || 1, `${done} de ${st.levels.length} niveles superados`, 'levelsDone');
     }
     case 'comments_resolved':
-      return of(st.resolved, a.param, `${Math.min(st.resolved, a.param)} de ${a.param} comentarios atendidos`);
+      return of(st.resolved, a.param, `${Math.min(st.resolved, a.param)} de ${a.param} comentarios atendidos`, 'commentsResolved');
     case 'all_comments_resolved': {
       const total = st.resolved + st.pending;
-      if (total === 0) return of(0, 1, 'Atiendan su primer comentario');
-      return of(st.resolved, total, st.pending ? missing(st.pending, 'comentario pendiente', 'comentarios pendientes') : 'Sin pendientes');
+      if (total === 0) return of(0, 1, 'Atiendan su primer comentario', 'firstComment');
+      return st.pending
+        ? of(st.resolved, total, missing(st.pending, 'comentario pendiente', 'comentarios pendientes'), 'commentsLeft')
+        : of(st.resolved, total, 'Sin pendientes', 'noPending');
     }
     default: return of(0, 1, '');
   }

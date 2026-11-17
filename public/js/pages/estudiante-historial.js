@@ -2,8 +2,10 @@
 import { get } from '../core/api.js';
 import { initLayout, setMain } from '../core/layout.js';
 import { html, safe, icon, ago, fmtDateTime, emptyState, loading, param } from '../core/ui.js';
+import { t } from '../core/i18n.js';
 
-const KIND_TEXT = { manual: 'Guardado manual', automatico: 'Guardado automático', enviada: 'Enviada a revisión' };
+/** Tipo de versión que guarda el servidor (manual | automatico | enviada) → texto. */
+const kindText = (kind) => t(`student.history.kind.${kind}`);
 const state = { sections: [], sectionId: null, versions: [], selected: null };
 
 const sectionLabel = (s) => `${s.level_position}.${s.position} ${s.name}`;
@@ -13,9 +15,9 @@ function versionButton(v) {
   const style = on ? 'background:var(--green-soft);border-color:var(--green)' : 'background:var(--surface);border-color:transparent';
   return safe(html`<li><button type="button" class="btn" data-version="${v.number}" aria-pressed="${on ? 'true' : 'false'}"
       style="width:100%;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;min-height:0;height:auto;border-width:2px;text-align:left;white-space:normal;font-weight:400;${style}">
-    <span class="row between" style="width:100%;flex-wrap:nowrap"><strong>Versión ${v.number}</strong>
+    <span class="row between" style="width:100%;flex-wrap:nowrap"><strong>${t('student.history.versionN', { n: v.number })}</strong>
       <span class="muted small" style="font-weight:600;white-space:nowrap">${ago(v.created_at)}</span></span>
-    <span style="color:#3E4A45">${v.author_name} · ${v.number === 1 ? 'Primer borrador' : KIND_TEXT[v.kind]}</span>
+    <span style="color:#3E4A45">${v.author_name} · ${v.number === 1 ? t('student.history.firstDraft') : kindText(v.kind)}</span>
   </button></li>`);
 }
 
@@ -23,8 +25,8 @@ function versionList() {
   const n = state.versions.length;
   const body = n
     ? safe(html`<ol class="stack" style="list-style:none;margin:0;padding:0;gap:4px">${state.versions.map(versionButton)}</ol>`)
-    : emptyState('history', 'Sin versiones', 'Esta sección todavía no se ha guardado.');
-  return safe(html`<h2 id="lista" style="margin:8px 8px 12px;font-size:16px;font-weight:800">${n} ${n === 1 ? 'versión' : 'versiones'}</h2>${body}`);
+    : emptyState('history', t('student.history.noVersions'), t('student.history.noVersionsText'));
+  return safe(html`<h2 id="lista" style="margin:8px 8px 12px;font-size:16px;font-weight:800">${t('student.history.versionCount', { count: n })}</h2>${body}`);
 }
 
 /** Texto de la comparación: lo agregado en verde y lo eliminado en rojo tachado. */
@@ -39,27 +41,29 @@ function diffHtml(parts) {
 async function showDiff() {
   const box = document.getElementById('compare');
   if (!state.selected) {
-    box.innerHTML = html`${emptyState('history', 'Elige una versión', 'Selecciona una versión de la lista para ver qué cambió.')}`;
+    box.innerHTML = html`${emptyState('history', t('student.history.pickTitle'), t('student.history.pickText'))}`;
     return;
   }
   box.innerHTML = loading().value;
   try {
     const d = await get(`/sections/${state.sectionId}/versions/${state.selected}/diff`);
     const v = d.version;
-    const title = d.previous ? `Versión ${v.number} comparada con la versión ${d.previous.number}` : `Versión ${v.number} · primera versión`;
+    const title = d.previous
+      ? t('student.history.comparedWith', { n: v.number, prev: d.previous.number })
+      : t('student.history.firstVersion', { n: v.number });
     const changed = d.diff.some((p) => p.added || p.removed);
     box.innerHTML = html`<div class="card-head">
         <div><h2 id="ver" style="font-size:18px;font-weight:800">${title}</h2>
-          <div class="muted" style="margin-top:2px">${v.author_name} · ${fmtDateTime(v.created_at)} · ${KIND_TEXT[v.kind]}</div></div>
+          <div class="muted" style="margin-top:2px">${v.author_name} · ${fmtDateTime(v.created_at)} · ${kindText(v.kind)}</div></div>
         <div class="row small" style="gap:12px;font-weight:600">
-          <span class="row" style="gap:6px"><span class="diff-add" style="display:inline-block;width:14px;height:14px"></span>Agregado</span>
-          <span class="row" style="gap:6px"><span class="diff-del" style="display:inline-block;width:14px;height:14px"></span>Eliminado</span></div>
+          <span class="row" style="gap:6px"><span class="diff-add" style="display:inline-block;width:14px;height:14px"></span>${t('student.history.added')}</span>
+          <span class="row" style="gap:6px"><span class="diff-del" style="display:inline-block;width:14px;height:14px"></span>${t('student.history.removed')}</span></div>
       </div>
       <article class="editor-area" style="min-height:240px;white-space:pre-wrap;max-width:820px">${d.diff.length
-        ? diffHtml(d.diff) : safe(html`<span class="muted">Esta versión no tiene texto.</span>`)}</article>
-      ${changed || !d.previous ? '' : safe(html`<div class="alert alert-info" style="margin:0 24px 16px">${icon('info', 18)}<div>No hay cambios de texto frente a la versión anterior (pudo cambiar solo el formato).</div></div>`)}`;
+        ? diffHtml(d.diff) : safe(html`<span class="muted">${t('student.history.noText')}</span>`)}</article>
+      ${changed || !d.previous ? '' : safe(html`<div class="alert alert-info" style="margin:0 24px 16px">${icon('info', 18)}<div>${t('student.history.noTextChanges')}</div></div>`)}`;
   } catch (err) {
-    box.innerHTML = html`${emptyState('alert', 'No se pudo cargar la comparación', err.message)}`;
+    box.innerHTML = html`${emptyState('alert', t('student.history.diffError'), err.message)}`;
   }
 }
 
@@ -73,7 +77,7 @@ async function loadSection() {
   } catch (err) {
     state.versions = [];
     state.selected = null;
-    list.innerHTML = html`${emptyState('alert', 'No se pudo cargar el historial', err.message)}`;
+    list.innerHTML = html`${emptyState('alert', t('student.history.loadError'), err.message)}`;
     return;
   }
   list.innerHTML = versionList().value;
@@ -83,9 +87,9 @@ async function loadSection() {
 function render() {
   setMain(html`
     <div class="page-head">
-      <div><h1 class="page-title">Historial de versiones</h1>
-        <p class="page-sub">Cada guardado crea una versión con su autor y su fecha.</p></div>
-      <div class="field" style="min-width:min(320px,100%)"><label class="label" for="sec">Sección</label>
+      <div><h1 class="page-title">${t('menu.estudiante.historial')}</h1>
+        <p class="page-sub">${t('student.history.lead')}</p></div>
+      <div class="field" style="min-width:min(320px,100%)"><label class="label" for="sec">${t('common.section')}</label>
         <select class="select" id="sec" style="font-weight:600">${state.sections.map((s) => safe(html`<option value="${s.id}"
           ${safe(s.id === state.sectionId ? 'selected' : '')}>${sectionLabel(s)}</option>`))}</select></div>
     </div>
@@ -94,7 +98,7 @@ function render() {
       <section class="card grow" aria-labelledby="ver" style="overflow:hidden">
         <div id="compare" aria-live="polite"></div>
         <div class="row" style="padding:14px 24px;background:var(--bg);border-top:1px solid var(--line-soft);color:#3E4A45">
-          ${icon('lock', 18)}Solo lectura. Las versiones guardadas no se pueden modificar.</div>
+          ${icon('lock', 18)}${t('student.history.readOnly')}</div>
       </section>
     </div>`);
   document.getElementById('sec').addEventListener('change', (e) => {
@@ -116,14 +120,14 @@ async function main() {
   try {
     state.sections = (await get('/student/history-sections')).sections;
   } catch (err) {
-    setMain(html`<div><h1 class="page-title">Historial de versiones</h1></div>
+    setMain(html`<div><h1 class="page-title">${t('menu.estudiante.historial')}</h1></div>
       <div class="card">${emptyState(err.status === 404 ? 'users' : 'alert',
-        err.status === 404 ? 'Todavía no perteneces a un equipo' : 'No pudimos cargar el historial', err.message)}</div>`);
+        err.status === 404 ? t('student.noTeam') : t('student.history.loadError'), err.message)}</div>`);
     return;
   }
   if (!state.sections.length) {
-    setMain(html`<div><h1 class="page-title">Historial de versiones</h1></div>
-      <div class="card">${emptyState('file', 'Tu equipo aún no tiene secciones')}</div>`);
+    setMain(html`<div><h1 class="page-title">${t('menu.estudiante.historial')}</h1></div>
+      <div class="card">${emptyState('file', t('student.history.noSections'))}</div>`);
     return;
   }
   const wanted = Number(param('section'));

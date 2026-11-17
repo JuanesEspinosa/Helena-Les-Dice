@@ -24,7 +24,8 @@
     "PASSWORD_SHORT": "The password must be at least 8 characters long.",
     "PASSWORD_NO_DIGIT": "The password must contain at least one number.",
     "PASSWORD_LONG": "The password is too long.",
-    "PASSWORD_MISMATCH": "The passwords do not match."
+    "PASSWORD_MISMATCH": "The passwords do not match.",
+    "SAME_PERSON": "The author and the reviewer cannot be the same person."
   },
   "fields": {
     "generic": "Field",
