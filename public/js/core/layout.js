@@ -67,13 +67,13 @@ export async function initLayout({ roles, active } = {}) {
       <span style="min-width:0"><span class="brand-sub" style="display:block">${subtitle}</span></span>
     </a>
     <div class="header-actions">
-      <span class="hide-sm" id="lang-slot"></span>
+      <span id="lang-slot"></span>
       <a class="btn btn-icon" href="/notificaciones.html" id="bell" aria-label="${t('layout.notifications')}">${icon('bell')}<span class="notif-count" hidden></span></a>
       <a class="user-chip" href="/perfil.html" title="${t('layout.myProfile')}">
         <span class="avatar" aria-hidden="true">${initials(user.name)}</span>
         <span class="user-chip__text"><span class="user-chip__name" style="display:block">${user.name}</span><span class="user-chip__role" style="display:block">${t(`roles.${user.role}`)}</span></span>
       </a>
-      <button class="btn btn-ghost" type="button" id="logout-btn">${icon('logout', 18)}<span class="hide-sm">${t('layout.logout')}</span></button>
+      <button class="btn btn-ghost" type="button" id="logout-btn" aria-label="${t('layout.logout')}">${icon('logout', 18)}<span class="hide-sm">${t('layout.logout')}</span></button>
     </div>`;
   document.body.prepend(header);
 

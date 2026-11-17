@@ -450,6 +450,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: minmax(0, 1fr); }
   .page-title { font-size: 23px; }
   .hide-sm { display: none !important; }
+  /* Cabecera en móvil: el selector de idioma sigue visible, más estrecho, y nada se desborda */
+  .header-actions { gap: 4px; flex: none; }
+  .app-header .brand { flex: 1 1 0; overflow: hidden; }
+  .app-header .brand-sub { display: none !important; }
+  .app-header .logo { width: 60px; max-width: 100%; height: auto; }
+  .app-header .lang-select .select { width: 5rem; min-height: 44px; padding: 6px 22px 6px 8px; font-size: 14px; text-overflow: ellipsis; }
+  #logout-btn { min-width: 44px; padding: 0 10px; }
   .card-head, .card-body, .card-pad { padding-left: 16px; padding-right: 16px; }
   .table th:first-child, .table td:first-child { padding-left: 16px; }
   .editor-area { padding: 20px 16px; }
