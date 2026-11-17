@@ -82,6 +82,17 @@ public/
 backups/            copias de seguridad generadas (.sql.gz)
 ```
 
+## Idiomas
+
+La interfaz está en español (por defecto), inglés, portugués de Brasil, francés, alemán e italiano. Antes de iniciar sesión el idioma se guarda en el navegador; después, en la cuenta (`users.lang`). Si falta una clave en un idioma, se muestra en español.
+
+- **Diccionarios:** `public/js/i18n/<idioma>/<área>.json` (áreas `common`, `access`, `student`, `teacher`, `admin`, `errors`, `notif`). El español (`es`) es la fuente de verdad.
+- **Añadir una clave:** escríbela en `es` y en los otros cinco idiomas, y úsala con `t('área.vista.clave', { variable })` (o `data-i18n="clave"` en el HTML). Los plurales son objetos `{ "one": "…", "other": "…" }` que se eligen por `count`.
+- **Errores del servidor:** cada error lleva un `code` estable; su texto vive en `errors.json` (`errors.<CODE>`). El mensaje en español del servidor queda como respaldo.
+- **Añadir un idioma:** agrega su código y locale en `LANGS` (`public/js/core/i18n.js`) y en el `CHECK` de `users.lang` (`db/schema.sql` y `db/migrate.js`), y crea su carpeta de diccionarios.
+- **Verificar:** `npm run i18n:check` (mismas claves en los 6 idiomas y ningún texto en español escrito en el código); `node scripts/i18n-check.js untranslated` lista lo que quedó igual al español.
+- **Base de datos existente:** `npm run db:migrate` aplica el `CHECK` de idiomas y las columnas nuevas de avisos sin borrar datos (se puede correr varias veces).
+
 ## Notas
 
 - **Recuperación de contraseña (RF-13):** no hay servidor de correo configurado, así que el enlace de
