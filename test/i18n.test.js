@@ -112,3 +112,41 @@ test('fechas y números salen en el formato del idioma activo, no fijos en es-CO
   assert.equal(en.date, 'Mar 5, 2026');
   assert.equal(en.number, '1,234.5');
 });
+
+test('una clave que falta en el diccionario cargado se muestra en español', async () => {
+  globalThis.document = fakeDocument([]);
+  // en llega completo salvo common.save; es sí la tiene ("Guardar")
+  globalThis.fetch = async (url) => {
+    const res = await servingFetch(url);
+    if (!url.endsWith('/en/common.json')) return res;
+    const data = await res.json();
+    const { save, ...common } = data.common;
+    return { ok: true, json: async () => ({ ...data, common }) };
+  };
+
+  await i18n.initI18n('en');
+
+  assert.equal(i18n.t('common.save'), 'Guardar');
+  assert.equal(i18n.t('common.cancel'), 'Cancel');
+});
+
+test('el mensaje de un error traducido incluye sus datos variables (params)', async () => {
+  globalThis.document = fakeDocument([]);
+  globalThis.fetch = servingFetch;
+  await i18n.initI18n('en');
+
+  const text = i18n.tError({ code: 'ACCOUNT_LOCKED', params: { minutes: 7 }, message: 'Tu cuenta está bloqueada…' });
+
+  assert.equal(text, 'Your account is locked due to failed attempts. Try again in 7 minutes.');
+  assert.doesNotMatch(text, /\{minutes\}/);
+});
+
+test('un error con un código sin traducción muestra el mensaje del servidor', async () => {
+  globalThis.document = fakeDocument([]);
+  globalThis.fetch = servingFetch;
+  await i18n.initI18n('en');
+
+  const text = i18n.tError({ code: 'CODIGO_SIN_TRADUCCION', message: 'Mensaje del servidor en español.' });
+
+  assert.equal(text, 'Mensaje del servidor en español.');
+});
