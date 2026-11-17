@@ -139,12 +139,12 @@ router.get('/members', ah(async (req, res) => {
 /** Valida una fila de asignación contra los integrantes del equipo (RF-05). */
 function checkAssignment(row, memberIds) {
   const sectionId = Number(row && row.section_id);
-  if (!Number.isInteger(sectionId)) throw new HttpError(400, 'Sección no válida.');
+  if (!Number.isInteger(sectionId)) throw new HttpError(400, 'Sección no válida.', undefined, { code: 'SECTION_INVALID' });
   const resp = Number(row.responsible_id);
   const rev = Number(row.reviewer_id);
-  if (!memberIds.has(resp)) throw new HttpError(400, 'Solo puedes asignar integrantes de tu equipo.', `resp-${sectionId}`);
-  if (!memberIds.has(rev)) throw new HttpError(400, 'Solo puedes asignar integrantes de tu equipo.', `rev-${sectionId}`);
-  if (resp === rev) throw new HttpError(400, 'El responsable y el revisor no pueden ser la misma persona.', `rev-${sectionId}`);
+  if (!memberIds.has(resp)) throw new HttpError(400, 'Solo puedes asignar integrantes de tu equipo.', `resp-${sectionId}`, { code: 'ASSIGN_NOT_MEMBER' });
+  if (!memberIds.has(rev)) throw new HttpError(400, 'Solo puedes asignar integrantes de tu equipo.', `rev-${sectionId}`, { code: 'ASSIGN_NOT_MEMBER' });
+  if (resp === rev) throw new HttpError(400, 'El responsable y el revisor no pueden ser la misma persona.', `rev-${sectionId}`, { code: 'SAME_PERSON' });
   return { sectionId, resp, rev };
 }
 
@@ -152,8 +152,8 @@ router.put('/assignments', ah(async (req, res) => {
   const user = req.session.user;
   const team = await loadTeam(req);
   const list = req.body && req.body.assignments;
-  if (!Array.isArray(list) || list.length === 0) throw new HttpError(400, 'No hay asignaciones para guardar.');
-  if (list.length > 100) throw new HttpError(400, 'Demasiadas asignaciones en una sola petición.');
+  if (!Array.isArray(list) || list.length === 0) throw new HttpError(400, 'No hay asignaciones para guardar.', undefined, { code: 'ASSIGNMENTS_EMPTY' });
+  if (list.length > 100) throw new HttpError(400, 'Demasiadas asignaciones en una sola petición.', undefined, { code: 'ASSIGNMENTS_TOO_MANY' });
   const names = new Map((await teamMembers(team.id)).map((m) => [m.id, m.name]));
   const memberIds = new Set(names.keys());
   const rows = list.map((r) => checkAssignment(r, memberIds));
@@ -168,10 +168,10 @@ router.put('/assignments', ah(async (req, res) => {
         [r.sectionId, team.id]
       );
       const sec = found[0];
-      if (!sec) throw new HttpError(400, 'Solo puedes asignar secciones de tu equipo.');
+      if (!sec) throw new HttpError(400, 'Solo puedes asignar secciones de tu equipo.', undefined, { code: 'ASSIGN_NOT_TEAM_SECTION' });
       if (sec.responsible_id === r.resp && sec.reviewer_id === r.rev) continue;
       if (sec.status === 'aprobado') {
-        throw new HttpError(409, `"${sec.name}" ya fue aprobada y no se puede reasignar.`, `resp-${sec.id}`);
+        throw new HttpError(409, `"${sec.name}" ya fue aprobada y no se puede reasignar.`, `resp-${sec.id}`, { code: 'SECTION_APPROVED_REASSIGN', params: { name: sec.name } });
       }
       await client.query('UPDATE sections SET responsible_id = $1, reviewer_id = $2 WHERE id = $3', [r.resp, r.rev, sec.id]);
       await logActivity(client, {

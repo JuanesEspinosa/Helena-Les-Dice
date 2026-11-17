@@ -136,7 +136,7 @@ async function createBackup({ kind, userId = null }) {
     const noSpace = err.code === 'ENOSPC';
     const message = noSpace ? NO_SPACE_MSG : `No se pudo generar la copia: ${err.message}`;
     await recordBackup({ kind, userId, status: 'fallida', error: message }).catch((e) => console.error('[backup] no se pudo registrar el fallo:', e.message));
-    if (noSpace) throw new HttpError(507, NO_SPACE_MSG);
+    if (noSpace) throw new HttpError(507, NO_SPACE_MSG, undefined, { code: 'BACKUP_NO_SPACE' });
     throw err;
   }
 }

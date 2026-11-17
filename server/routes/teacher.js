@@ -37,30 +37,30 @@ const actionLabel = (a) => ACTION_LABEL[a] || a.replace(/_/g, ' ');
 /** Id entero positivo de la URL o del cuerpo; 400 si no es válido. */
 function idParam(value, label = 'El identificador') {
   const n = requireInt(value, 'id', label);
-  if (n <= 0) throw new HttpError(400, `${label} no es válido.`, 'id');
+  if (n <= 0) throw new HttpError(400, `${label} no es válido.`, 'id', { code: 'ID_INVALID' });
   return n;
 }
 
 /** Lista de ids enteros sin repetir (puede venir vacía). */
 function idList(value, field) {
   if (value === undefined || value === null) return [];
-  if (!Array.isArray(value)) throw new HttpError(400, 'La lista de estudiantes no es válida.', field);
+  if (!Array.isArray(value)) throw new HttpError(400, 'La lista de estudiantes no es válida.', field, { code: 'STUDENT_LIST_INVALID' });
   const ids = [...new Set(value.map(Number))];
-  if (ids.some((n) => !Number.isInteger(n) || n <= 0)) throw new HttpError(400, 'La lista de estudiantes no es válida.', field);
+  if (ids.some((n) => !Number.isInteger(n) || n <= 0)) throw new HttpError(400, 'La lista de estudiantes no es válida.', field, { code: 'STUDENT_LIST_INVALID' });
   return ids;
 }
 
 function optionalText(value, field, label, max) {
   if (value === undefined || value === null) return '';
-  if (typeof value !== 'string') throw new HttpError(400, `${label} no es válido.`, field);
+  if (typeof value !== 'string') throw new HttpError(400, `${label} no es válido.`, field, { code: 'TEXT_INVALID' });
   const text = value.trim();
-  if (text.length > max) throw new HttpError(400, `${label} es demasiado largo (máximo ${max} caracteres).`, field);
+  if (text.length > max) throw new HttpError(400, `${label} es demasiado largo (máximo ${max} caracteres).`, field, { code: 'TEXT_TOO_LONG', params: { max } });
   return text;
 }
 
 function pointsValue(value) {
   const n = requireInt(value, 'points', 'Los puntos');
-  if (n < 0 || n > 10000) throw new HttpError(400, 'Los puntos deben estar entre 0 y 10000.', 'points');
+  if (n < 0 || n > 10000) throw new HttpError(400, 'Los puntos deben estar entre 0 y 10000.', 'points', { code: 'POINTS_INVALID', params: { max: 10000 } });
   return n;
 }
 
@@ -85,7 +85,7 @@ async function pickPeriod(periods, raw) {
   if (raw !== undefined && raw !== '') {
     const id = idParam(raw, 'El periodo');
     const p = periods.find((x) => x.id === id);
-    if (!p) throw new HttpError(404, 'El periodo no existe.', 'period');
+    if (!p) throw new HttpError(404, 'El periodo no existe.', 'period', { code: 'PERIOD_NOT_FOUND' });
     return p;
   }
   return periods.find((p) => p.active) || periods[0] || null;
@@ -94,8 +94,8 @@ async function pickPeriod(periods, raw) {
 async function requireActivePeriod(client, periodId) {
   const { rows } = await client.query('SELECT id, name, active FROM periods WHERE id = $1', [periodId]);
   const p = rows[0];
-  if (!p) throw new HttpError(400, 'El periodo académico no existe.', 'period_id');
-  if (!p.active) throw new HttpError(400, 'Solo se pueden crear o modificar equipos en un periodo activo.', 'period_id');
+  if (!p) throw new HttpError(400, 'El periodo académico no existe.', 'period_id', { code: 'PERIOD_NOT_FOUND' });
+  if (!p.active) throw new HttpError(400, 'Solo se pueden crear o modificar equipos en un periodo activo.', 'period_id', { code: 'PERIOD_INACTIVE' });
   return p;
 }
 
@@ -228,7 +228,7 @@ async function loadTeam(id) {
        FROM teams t JOIN periods p ON p.id = t.period_id WHERE t.id = $1`,
     [id]
   );
-  if (!team) throw new HttpError(404, 'El equipo no existe.');
+  if (!team) throw new HttpError(404, 'El equipo no existe.', undefined, { code: 'TEAM_NOT_FOUND' });
   return team;
 }
 
@@ -353,7 +353,7 @@ router.get('/students', ah(async (req, res) => {
 /** Nombre único del equipo dentro del periodo. */
 async function assertTeamName(client, name, periodId, exceptId = 0) {
   const { rows } = await client.query('SELECT 1 FROM teams WHERE lower(name) = lower($1) AND period_id = $2 AND id <> $3', [name, periodId, exceptId]);
-  if (rows.length) throw new HttpError(409, 'Ya existe un equipo con ese nombre en el periodo.', 'name');
+  if (rows.length) throw new HttpError(409, 'Ya existe un equipo con ese nombre en el periodo.', 'name', { code: 'TEAM_NAME_TAKEN' });
 }
 
 /**
@@ -375,12 +375,12 @@ async function addMembers(client, team, period, studentIds) {
   for (const id of studentIds) {
     const u = users.find((x) => x.id === id);
     if (!u || u.role !== 'estudiante' || !u.active) {
-      skipped.push({ id, name: u ? u.name : `Usuario ${id}`, message: `${u ? u.name : 'El usuario'} no es un estudiante activo. No se agregó.` });
+      skipped.push({ id, name: u ? u.name : `Usuario ${id}`, message: `${u ? u.name : 'El usuario'} no es un estudiante activo. No se agregó.`, code: 'STUDENT_NOT_ACTIVE', params: { name: u ? u.name : `#${id}` } });
       continue;
     }
     if (u.team_id === team.id) continue;
     if (u.team_id) {
-      skipped.push({ id, name: u.name, message: `${u.name} ya pertenece al ${u.team_name} en el periodo ${period.name}. No se agregó.` });
+      skipped.push({ id, name: u.name, message: `${u.name} ya pertenece al ${u.team_name} en el periodo ${period.name}. No se agregó.`, code: 'STUDENT_IN_OTHER_TEAM', params: { name: u.name, team: u.team_name, period: period.name } });
       continue;
     }
     const r = await client.query(
@@ -388,7 +388,7 @@ async function addMembers(client, team, period, studentIds) {
       [team.id, id, period.id]
     );
     if (r.rowCount === 0) {
-      skipped.push({ id, name: u.name, message: `${u.name} ya pertenece a otro equipo en el periodo ${period.name}. No se agregó.` });
+      skipped.push({ id, name: u.name, message: `${u.name} ya pertenece a otro equipo en el periodo ${period.name}. No se agregó.`, code: 'STUDENT_IN_ANOTHER_TEAM', params: { name: u.name, period: period.name } });
     } else added.push({ id, name: u.name });
   }
   if (added.length) {
@@ -418,7 +418,7 @@ async function removeMembers(client, team, studentIds) {
   );
   for (const m of rows) {
     if (m.contributions > 0) {
-      kept.push({ id: m.id, name: m.name, message: `${m.name} ya tiene ${m.contributions} aporte(s) en el equipo y no se puede quitar.` });
+      kept.push({ id: m.id, name: m.name, message: `${m.name} ya tiene ${m.contributions} aporte(s) en el equipo y no se puede quitar.`, code: 'MEMBER_HAS_CONTRIBUTIONS', params: { name: m.name, count: m.contributions } });
       continue;
     }
     await client.query('UPDATE sections SET responsible_id = NULL WHERE team_id = $1 AND responsible_id = $2', [team.id, m.id]);
@@ -434,7 +434,7 @@ router.post('/teams', ah(async (req, res) => {
   const project = optionalText(req.body.project, 'project', 'El proyecto', 160);
   const periodId = idParam(req.body.period_id, 'El periodo académico');
   const studentIds = idList(req.body.student_ids, 'student_ids');
-  if (studentIds.length > MAX_MEMBERS) throw new HttpError(400, `Un equipo puede tener como máximo ${MAX_MEMBERS} integrantes.`, 'student_ids');
+  if (studentIds.length > MAX_MEMBERS) throw new HttpError(400, `Un equipo puede tener como máximo ${MAX_MEMBERS} integrantes.`, 'student_ids', { code: 'TEAM_TOO_MANY', params: { max: MAX_MEMBERS } });
   const user = req.session.user;
 
   const result = await tx(async (client) => {
@@ -468,12 +468,12 @@ router.put('/teams/:id', ah(async (req, res) => {
   const result = await tx(async (client) => {
     const { rows } = await client.query('SELECT id, name, project, period_id FROM teams WHERE id = $1 FOR UPDATE', [id]);
     const current = rows[0];
-    if (!current) throw new HttpError(404, 'El equipo no existe.');
+    if (!current) throw new HttpError(404, 'El equipo no existe.', undefined, { code: 'TEAM_NOT_FOUND' });
     const period = await requireActivePeriod(client, current.period_id);
     await assertTeamName(client, name, period.id, id);
     const { rows: countRows } = await client.query('SELECT COUNT(*)::int AS n FROM team_members WHERE team_id = $1', [id]);
     if (countRows[0].n + addIds.length - removeIds.length > MAX_MEMBERS) {
-      throw new HttpError(400, `Un equipo puede tener como máximo ${MAX_MEMBERS} integrantes.`, 'student_ids');
+      throw new HttpError(400, `Un equipo puede tener como máximo ${MAX_MEMBERS} integrantes.`, 'student_ids', { code: 'TEAM_TOO_MANY', params: { max: MAX_MEMBERS } });
     }
     await client.query('UPDATE teams SET name = $1, project = $2 WHERE id = $3', [name, project, id]);
     const team = { ...current, name, project };
@@ -542,7 +542,7 @@ router.put('/levels/order', ah(async (req, res) => {
     const { rows } = await client.query('SELECT id FROM levels FOR UPDATE');
     const all = rows.map((r) => r.id);
     if (ids.length !== all.length || !all.every((x) => ids.includes(x))) {
-      throw new HttpError(400, 'El nuevo orden debe incluir todos los niveles una sola vez.', 'ids');
+      throw new HttpError(400, 'El nuevo orden debe incluir todos los niveles una sola vez.', 'ids', { code: 'LEVEL_ORDER_INVALID' });
     }
     await renumberLevels(client, ids);
     await logActivity(client, { userId: req.session.user.id, action: 'ordeno_niveles', detail: `Orden: ${ids.join(', ')}` });
@@ -553,14 +553,14 @@ router.put('/levels/order', ah(async (req, res) => {
 
 /** Valida la lista de secciones del cuerpo: [{ id?, name }]. */
 function parseSections(value) {
-  if (!Array.isArray(value)) throw new HttpError(400, 'La lista de secciones no es válida.', 'sections');
-  if (value.length > 50) throw new HttpError(400, 'Un nivel puede tener como máximo 50 secciones.', 'sections');
+  if (!Array.isArray(value)) throw new HttpError(400, 'La lista de secciones no es válida.', 'sections', { code: 'SECTION_LIST_INVALID' });
+  if (value.length > 50) throw new HttpError(400, 'Un nivel puede tener como máximo 50 secciones.', 'sections', { code: 'LEVEL_TOO_MANY_SECTIONS', params: { max: 50 } });
   return value.map((s, i) => {
     const name = typeof s?.name === 'string' ? s.name.trim() : '';
-    if (!name) throw new HttpError(400, `La sección ${i + 1} no tiene nombre.`, 'sections');
-    if (name.length > 160) throw new HttpError(400, `El nombre de la sección ${i + 1} es demasiado largo.`, 'sections');
+    if (!name) throw new HttpError(400, `La sección ${i + 1} no tiene nombre.`, 'sections', { code: 'SECTION_NAME_REQUIRED', params: { n: i + 1 } });
+    if (name.length > 160) throw new HttpError(400, `El nombre de la sección ${i + 1} es demasiado largo.`, 'sections', { code: 'SECTION_NAME_TOO_LONG', params: { n: i + 1, max: 160 } });
     const id = s.id === undefined || s.id === null || s.id === '' ? null : Number(s.id);
-    if (id !== null && (!Number.isInteger(id) || id <= 0)) throw new HttpError(400, 'La lista de secciones no es válida.', 'sections');
+    if (id !== null && (!Number.isInteger(id) || id <= 0)) throw new HttpError(400, 'La lista de secciones no es válida.', 'sections', { code: 'SECTION_LIST_INVALID' });
     return { id, name };
   });
 }
@@ -580,7 +580,7 @@ async function assertRemovable(client, sectionIds) {
   );
   if (rows.length) {
     const r = rows[0];
-    throw new HttpError(409, `No se puede quitar la sección "${r.name}": ${r.teams} equipo(s) ya tienen contenido o actividad en ella.`, 'sections');
+    throw new HttpError(409, `No se puede quitar la sección "${r.name}": ${r.teams} equipo(s) ya tienen contenido o actividad en ella.`, 'sections', { code: 'SECTION_HAS_CONTENT', params: { name: r.name, count: r.teams } });
   }
 }
 
@@ -593,11 +593,11 @@ router.put('/levels/:id', ah(async (req, res) => {
 
   const levels = await tx(async (client) => {
     const { rows } = await client.query('SELECT id, position FROM levels WHERE id = $1 FOR UPDATE', [id]);
-    if (!rows[0]) throw new HttpError(404, 'El nivel no existe.');
+    if (!rows[0]) throw new HttpError(404, 'El nivel no existe.', undefined, { code: 'LEVEL_NOT_FOUND' });
     const { rows: existing } = await client.query('SELECT id FROM level_sections WHERE level_id = $1', [id]);
     const existingIds = existing.map((r) => r.id);
     const foreign = wanted.find((s) => s.id !== null && !existingIds.includes(s.id));
-    if (foreign) throw new HttpError(400, 'Una de las secciones no pertenece a este nivel.', 'sections');
+    if (foreign) throw new HttpError(400, 'Una de las secciones no pertenece a este nivel.', 'sections', { code: 'SECTION_FOREIGN' });
     const keep = wanted.filter((s) => s.id !== null).map((s) => s.id);
     const toRemove = existingIds.filter((x) => !keep.includes(x));
     await assertRemovable(client, toRemove);
@@ -629,10 +629,10 @@ router.delete('/levels/:id', ah(async (req, res) => {
   const levels = await tx(async (client) => {
     const { rows } = await client.query('SELECT id, position, name FROM levels WHERE id = $1 FOR UPDATE', [id]);
     const level = rows[0];
-    if (!level) throw new HttpError(404, 'El nivel no existe.');
+    if (!level) throw new HttpError(404, 'El nivel no existe.', undefined, { code: 'LEVEL_NOT_FOUND' });
     const usage = (await levelsWithUsage(client)).find((l) => l.id === id);
     if (usage.teams_started > 0) {
-      throw new HttpError(409, `No se puede eliminar el nivel: ${usage.teams_started} equipo(s) ya están trabajando en él.`);
+      throw new HttpError(409, `No se puede eliminar el nivel: ${usage.teams_started} equipo(s) ya están trabajando en él.`, undefined, { code: 'LEVEL_IN_USE', params: { count: usage.teams_started } });
     }
     await assertRemovable(client, usage.sections.map((s) => s.id));
     await client.query('DELETE FROM levels WHERE id = $1', [id]);

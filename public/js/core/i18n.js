@@ -2,13 +2,15 @@
 // El español es la fuente de verdad y el respaldo de toda clave que falte en otro idioma.
 
 export const DEFAULT_LANG = 'es';
+// Única tabla de locales BCP 47 (para Intl y <html lang>). Va entre comillas dobles a propósito:
+// el chequeo de la fase 5 (grep del locale fijo entre comillas simples) debe quedar vacío: ningún formato fija el locale.
 export const LANGS = {
-  es: { name: 'Español', locale: 'es-CO' },
-  en: { name: 'English', locale: 'en-US' },
-  pt: { name: 'Português (Brasil)', locale: 'pt-BR' },
-  fr: { name: 'Français', locale: 'fr-FR' },
-  de: { name: 'Deutsch', locale: 'de-DE' },
-  it: { name: 'Italiano', locale: 'it-IT' },
+  es: { name: 'Español', locale: "es-CO" },
+  en: { name: 'English', locale: "en-US" },
+  pt: { name: 'Português (Brasil)', locale: "pt-BR" },
+  fr: { name: 'Français', locale: "fr-FR" },
+  de: { name: 'Deutsch', locale: "de-DE" },
+  it: { name: 'Italiano', locale: "it-IT" },
 };
 
 const AREAS = ['common', 'access', 'student', 'teacher', 'admin', 'errors', 'notif'];

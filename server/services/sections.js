@@ -27,7 +27,7 @@ async function nextVersionNumber(client, sectionId) {
 
 function assertResponsible(user, section) {
   if (user.role !== 'estudiante' || section.responsible_id !== user.id) {
-    throw new HttpError(403, 'Solo el responsable de la sección puede editarla. Tú la ves en modo lectura.');
+    throw new HttpError(403, 'Solo el responsable de la sección puede editarla. Tú la ves en modo lectura.', undefined, { code: 'EDIT_NOT_RESPONSIBLE' });
   }
 }
 
@@ -39,11 +39,11 @@ async function saveSection(user, sectionId, rawContent, kind = 'manual') {
   return tx(async (client) => {
     const section = await loadSectionFor(user, sectionId, client);
     assertResponsible(user, section);
-    if (!(await isSectionUnlocked(section, client))) throw new HttpError(409, 'Este nivel todavía está bloqueado.');
-    if (section.status === 'revision') throw new HttpError(409, 'La sección está en revisión y no se puede editar hasta que la revisen.');
-    if (section.status === 'aprobado') throw new HttpError(409, 'La sección ya fue aprobada y no se puede editar.');
+    if (!(await isSectionUnlocked(section, client))) throw new HttpError(409, 'Este nivel todavía está bloqueado.', undefined, { code: 'LEVEL_LOCKED' });
+    if (section.status === 'revision') throw new HttpError(409, 'La sección está en revisión y no se puede editar hasta que la revisen.', undefined, { code: 'SECTION_IN_REVIEW' });
+    if (section.status === 'aprobado') throw new HttpError(409, 'La sección ya fue aprobada y no se puede editar.', undefined, { code: 'SECTION_APPROVED' });
     const content = cleanHtml(rawContent);
-    if (content.length > MAX_CONTENT) throw new HttpError(413, 'El texto es demasiado largo para una sección.');
+    if (content.length > MAX_CONTENT) throw new HttpError(413, 'El texto es demasiado largo para una sección.', undefined, { code: 'CONTENT_TOO_LONG' });
     if (kind === 'automatico' && content === section.content) {
       return { saved: false, updated_at: section.updated_at };
     }
@@ -70,11 +70,11 @@ async function submitSection(user, sectionId, rawContent) {
   return tx(async (client) => {
     const section = await loadSectionFor(user, sectionId, client);
     assertResponsible(user, section);
-    if (!(await isSectionUnlocked(section, client))) throw new HttpError(409, 'Este nivel todavía está bloqueado.');
-    if (!['redaccion', 'devuelto'].includes(section.status)) throw new HttpError(409, 'La sección ya está en revisión o aprobada.');
-    if (!section.reviewer_id) throw new HttpError(409, 'Asignen un revisor antes de enviar la sección a revisión.');
+    if (!(await isSectionUnlocked(section, client))) throw new HttpError(409, 'Este nivel todavía está bloqueado.', undefined, { code: 'LEVEL_LOCKED' });
+    if (!['redaccion', 'devuelto'].includes(section.status)) throw new HttpError(409, 'La sección ya está en revisión o aprobada.', undefined, { code: 'SECTION_NOT_SUBMITTABLE' });
+    if (!section.reviewer_id) throw new HttpError(409, 'Asignen un revisor antes de enviar la sección a revisión.', undefined, { code: 'REVIEWER_REQUIRED' });
     const content = rawContent === undefined ? section.content : cleanHtml(rawContent);
-    if (!content.replace(/<[^>]*>/g, '').trim()) throw new HttpError(400, 'No puedes enviar una sección vacía.');
+    if (!content.replace(/<[^>]*>/g, '').trim()) throw new HttpError(400, 'No puedes enviar una sección vacía.', undefined, { code: 'SECTION_EMPTY' });
     await client.query(
       `UPDATE sections SET content = $1, status = 'revision', updated_at = now(), updated_by = $2 WHERE id = $3`,
       [content, user.id, sectionId]
@@ -101,20 +101,20 @@ async function submitSection(user, sectionId, rawContent) {
 /** Puede revisar: el revisor asignado (estudiante) o cualquier docente. */
 function assertCanReview(user, section) {
   const isReviewer = user.role === 'estudiante' && section.reviewer_id === user.id;
-  if (!isReviewer && user.role !== 'docente') throw new HttpError(403, 'Solo el revisor asignado o la docente pueden revisar esta sección.');
+  if (!isReviewer && user.role !== 'docente') throw new HttpError(403, 'Solo el revisor asignado o la docente pueden revisar esta sección.', undefined, { code: 'REVIEW_FORBIDDEN' });
 }
 
 /** Aprueba o devuelve una sección. Devolver exige una observación escrita (RF-07). */
 async function reviewSection(user, sectionId, decision, observation) {
   const note = typeof observation === 'string' ? observation.trim() : '';
-  if (!['aprobar', 'devolver'].includes(decision)) throw new HttpError(400, 'Decisión no válida.');
+  if (!['aprobar', 'devolver'].includes(decision)) throw new HttpError(400, 'Decisión no válida.', undefined, { code: 'DECISION_INVALID' });
   if (decision === 'devolver' && !note) {
-    throw new HttpError(400, 'Escribe una observación para devolver la sección.', 'observation');
+    throw new HttpError(400, 'Escribe una observación para devolver la sección.', 'observation', { code: 'OBSERVATION_REQUIRED' });
   }
   return tx(async (client) => {
     const section = await loadSectionFor(user, sectionId, client);
     assertCanReview(user, section);
-    if (section.status !== 'revision') throw new HttpError(409, 'Solo se pueden revisar secciones que están en revisión.');
+    if (section.status !== 'revision') throw new HttpError(409, 'Solo se pueden revisar secciones que están en revisión.', undefined, { code: 'SECTION_NOT_IN_REVIEW' });
     const status = decision === 'aprobar' ? 'aprobado' : 'devuelto';
     await client.query('UPDATE sections SET status = $1, updated_at = now(), updated_by = $2 WHERE id = $3', [status, user.id, sectionId]);
     if (note) {

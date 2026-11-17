@@ -19,7 +19,7 @@ async function studentTeam(userId) {
 /** Igual que studentTeam pero lanza 404 si el estudiante no tiene equipo. */
 async function requireStudentTeam(userId) {
   const team = await studentTeam(userId);
-  if (!team) throw new HttpError(404, 'Todavía no perteneces a ningún equipo. Pídele a la docente que te agregue.');
+  if (!team) throw new HttpError(404, 'Todavía no perteneces a ningún equipo. Pídele a la docente que te agregue.', undefined, { code: 'NO_TEAM' });
   return team;
 }
 
@@ -48,10 +48,10 @@ async function loadSectionFor(user, sectionId, client) {
       LEFT JOIN users rv ON rv.id = s.reviewer_id
      WHERE s.id = $1`;
   const section = client ? (await client.query(sql, [sectionId])).rows[0] : await one(sql, [sectionId]);
-  if (!section) throw new HttpError(404, 'La sección no existe.');
+  if (!section) throw new HttpError(404, 'La sección no existe.', undefined, { code: 'SECTION_NOT_FOUND' });
   if (user.role === 'estudiante') {
     const member = await one('SELECT 1 FROM team_members WHERE team_id = $1 AND user_id = $2', [section.team_id, user.id]);
-    if (!member) throw new HttpError(403, 'Solo puedes ver las secciones de tu equipo.');
+    if (!member) throw new HttpError(403, 'Solo puedes ver las secciones de tu equipo.', undefined, { code: 'SECTION_NOT_YOURS' });
   }
   return section;
 }
