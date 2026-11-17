@@ -120,13 +120,14 @@ async function init() {
   const form = document.getElementById('login-form');
   if (!form) return;
   redirectIfLogged();
-  const notice = urlNotice();
+  let notice = null;
   const paintNotice = () => notice && showAlert(form, notice.type, t(notice.key));
   let repaintToggle = () => {};
   langChangedHere = await wireLangSelect(document.getElementById('lang-slot'), () => {
     paintNotice();
     repaintToggle();
   });
+  notice = urlNotice(); // después de cargar el diccionario: valida el código contra errors.*
   repaintToggle = wirePasswordToggle(document.getElementById('pw-toggle'), form.querySelector('[name="password"]'));
   paintNotice();
   form.addEventListener('submit', onSubmit);
