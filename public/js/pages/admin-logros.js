@@ -61,9 +61,14 @@ function criterionText(key, n = 'N') {
   return n === 'N' ? base : base.replace('N', n);
 }
 
-const ruleText = (a) => criterionText(a.criterion, paramCriteria.includes(a.criterion) ? a.param : 'N');
+// Declaraciones de función (no const): el módulo usa await de primer nivel y las llama antes de estas líneas
+function ruleText(a) {
+  return criterionText(a.criterion, paramCriteria.includes(a.criterion) ? a.param : 'N');
+}
 
-const wonText = (count) => t('admin.achievements.wonBy', { count });
+function wonText(count) {
+  return t('admin.achievements.wonBy', { count });
+}
 
 function renderGrid() {
   const box = main.querySelector('#grid');

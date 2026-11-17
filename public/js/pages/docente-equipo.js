@@ -126,7 +126,10 @@ function activityCard() {
 }
 
 /** Frase de una acción del registro: activity.<action>, con respaldo en la etiqueta del servidor. */
-const actionText = (a) => (has(`activity.${a.action}`) ? t(`activity.${a.action}`) : a.label);
+// Declaración de función (no const): el módulo usa await de primer nivel y la llama antes de esta línea
+function actionText(a) {
+  return has(`activity.${a.action}`) ? t(`activity.${a.action}`) : a.label;
+}
 
 function reviewCard() {
   const list = state.data.in_review;
