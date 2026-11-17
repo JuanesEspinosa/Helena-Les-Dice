@@ -2,6 +2,7 @@
 import { get, post, put, del } from '../core/api.js';
 import { html, icon, safe, badgeIcon, toast, clearErrors, showError, withBusy, confirmDialog, emptyState, loading } from '../core/ui.js';
 import { initLayout, setMain } from '../core/layout.js';
+import { t, has } from '../core/i18n.js';
 
 const ICON_CHOICES = ['medal', 'trophy', 'star', 'flag', 'target', 'rocket', 'sparkles', 'message', 'checkCircle', 'zap', 'book', 'shield'];
 const MAX_ICON_BYTES = 200 * 1024;
@@ -17,13 +18,13 @@ await initLayout({ roles: ['administrador'], active: 'logros' });
 const main = setMain(html`
   <div class="page-head">
     <div>
-      <h1 class="page-title">Catálogo de logros</h1>
-      <p class="page-sub">Insignias globales que la plataforma otorga a los equipos al cumplir cada criterio.</p>
+      <h1 class="page-title">${t('menu.administrador.logros')}</h1>
+      <p class="page-sub">${t('admin.achievements.lead')}</p>
     </div>
-    <button type="button" class="btn btn-primary" id="new-btn">${icon('plus', 18)}Nuevo logro</button>
+    <button type="button" class="btn btn-primary" id="new-btn">${icon('plus', 18)}${t('admin.achievements.new')}</button>
   </div>
   <div class="split">
-    <section class="grow" aria-label="Logros"><div id="grid">${loading()}</div></section>
+    <section class="grow" aria-label="${t('admin.achievements.listLabel')}"><div id="grid">${loading()}</div></section>
     <aside class="side"><form class="card card-pad stack" id="ach-form" novalidate aria-labelledby="form-title"></form></aside>
   </div>`);
 
@@ -50,19 +51,24 @@ async function load() {
   }
 }
 
-/** "Aprobar N secciones" + param 3 → "aprobar 3 secciones". */
-function ruleText(a) {
-  const base = criteria[a.criterion] || a.criterion;
-  const text = paramCriteria.includes(a.criterion) ? base.replace('N', a.param) : base;
-  return text.charAt(0).toLowerCase() + text.slice(1);
+/**
+ * Texto de un criterio: admin.criteria.<clave> con {n}; si no hay traducción, el del servidor.
+ * Sin valor se muestra la "N" genérica ("Aprobar N secciones"); con valor, el número.
+ */
+function criterionText(key, n = 'N') {
+  if (has(`admin.criteria.${key}`)) return t(`admin.criteria.${key}`, { n });
+  const base = criteria[key] || key;
+  return n === 'N' ? base : base.replace('N', n);
 }
 
-function wonText(n) { return n === 0 ? 'ningún equipo' : n === 1 ? '1 equipo' : `${n} equipos`; }
+const ruleText = (a) => criterionText(a.criterion, paramCriteria.includes(a.criterion) ? a.param : 'N');
+
+const wonText = (count) => t('admin.achievements.wonBy', { count });
 
 function renderGrid() {
   const box = main.querySelector('#grid');
   if (items.length === 0) {
-    box.innerHTML = emptyState('medal', 'El catálogo está vacío', 'Crea el primer logro para motivar a los equipos.').value;
+    box.innerHTML = emptyState('medal', t('admin.achievements.emptyTitle'), t('admin.achievements.emptyText')).value;
     return;
   }
   box.innerHTML = html`<div class="ach-grid">${items.map((a) => safe(html`
@@ -70,10 +76,10 @@ function renderGrid() {
       <span class="badge-icon">${badgeIcon(a.icon, 26)}</span>
       <span class="ach__body">
         <span class="ach__name">${a.name}</span>
-        <span class="muted small">Criterio: ${ruleText(a)}</span>
-        <span class="small"><strong>${a.points} puntos</strong> · ganado por ${wonText(a.teams)}</span>
+        <span class="muted small">${t('admin.achievements.criterionRule', { rule: ruleText(a) })}</span>
+        <span class="small"><strong>${t('student.points', { count: a.points })}</strong> · ${wonText(a.teams)}</span>
       </span>
-      <button type="button" class="btn btn-ghost btn-icon btn-sm" data-edit="${a.id}" aria-label="Editar ${a.name}">${icon('edit', 18)}</button>
+      <button type="button" class="btn btn-ghost btn-icon btn-sm" data-edit="${a.id}" aria-label="${t('admin.achievements.editNamed', { name: a.name })}">${icon('edit', 18)}</button>
     </article>`))}</div>`;
 }
 
@@ -93,39 +99,39 @@ function select(a, focus) {
 function renderForm() {
   const a = selected || { name: '', description: '', criterion: 'first_submission', param: 1, points: 50, teams: 0 };
   form.innerHTML = html`
-    <h2 class="card-title" id="form-title" style="font-size:18px">${selected ? 'Editar logro' : 'Nuevo logro'}</h2>
+    <h2 class="card-title" id="form-title" style="font-size:18px">${t(selected ? 'admin.achievements.editTitle' : 'admin.achievements.new')}</h2>
     <div class="form-alert"></div>
     <div class="field">
-      <span class="label" id="icon-label">Ícono</span>
+      <span class="label" id="icon-label">${t('fields.icon')}</span>
       <div class="row" style="flex-wrap:nowrap">
         <span class="badge-icon" id="icon-preview">${badgeIcon(iconValue, 28)}</span>
         <div class="stack" style="gap:4px">
-          <label class="btn btn-outline btn-sm" style="align-self:flex-start">${icon('download', 16)}Subir PNG o SVG
+          <label class="btn btn-outline btn-sm" style="align-self:flex-start">${icon('download', 16)}${t('admin.achievements.upload')}
             <input type="file" name="icon_file" accept="image/png,image/svg+xml" class="sr-only"></label>
-          <span class="hint">PNG o SVG, máximo 200 KB. O elige uno de la lista.</span>
+          <span class="hint">${t('admin.achievements.uploadHint')}</span>
         </div>
       </div>
       <input type="hidden" name="icon" value="${iconValue}">
       <div class="icon-grid" role="radiogroup" aria-labelledby="icon-label">${ICON_CHOICES.map((k) => safe(html`
-        <button type="button" class="icon-opt" role="radio" aria-checked="${iconValue === k}" data-icon="${k}" aria-label="Ícono ${k}">${icon(k, 20)}</button>`))}</div>
+        <button type="button" class="icon-opt" role="radio" aria-checked="${iconValue === k}" data-icon="${k}" aria-label="${t('admin.achievements.iconNamed', { name: k })}">${icon(k, 20)}</button>`))}</div>
     </div>
-    <div class="field"><label class="label" for="l-nombre">Nombre</label>
+    <div class="field"><label class="label" for="l-nombre">${t('fields.name')}</label>
       <input class="input" id="l-nombre" name="name" type="text" maxlength="80" required autocomplete="off" value="${a.name}"></div>
-    <div class="field"><label class="label" for="l-desc">Descripción</label>
+    <div class="field"><label class="label" for="l-desc">${t('fields.description')}</label>
       <textarea class="textarea" id="l-desc" name="description" rows="2" maxlength="500">${a.description}</textarea></div>
-    <div class="field"><label class="label" for="l-crit">Criterio</label>
-      <select class="select" id="l-crit" name="criterion">${Object.entries(criteria).map(([k, label]) => safe(html`
-        <option value="${k}" ${k === a.criterion ? 'selected' : ''}>${label}</option>`))}</select></div>
+    <div class="field"><label class="label" for="l-crit">${t('fields.criterion')}</label>
+      <select class="select" id="l-crit" name="criterion">${Object.keys(criteria).map((k) => safe(html`
+        <option value="${k}" ${k === a.criterion ? 'selected' : ''}>${criterionText(k)}</option>`))}</select></div>
     <div class="grid grid-2" style="gap:12px">
-      <div class="field" id="param-field" ${paramCriteria.includes(a.criterion) ? '' : 'hidden'}><label class="label" for="l-param">Valor de N</label>
+      <div class="field" id="param-field" ${paramCriteria.includes(a.criterion) ? '' : 'hidden'}><label class="label" for="l-param">${t('fields.param')}</label>
         <input class="input" id="l-param" name="param" type="number" min="1" max="1000" value="${a.param || 1}"></div>
-      <div class="field"><label class="label" for="l-pts">Puntos</label>
+      <div class="field"><label class="label" for="l-pts">${t('fields.points')}</label>
         <input class="input" id="l-pts" name="points" type="number" min="0" max="10000" required value="${a.points}"></div>
     </div>
-    ${selected && a.teams > 0 ? safe(html`<p class="note note--blue small">${wonText(a.teams).replace(/^./, (c) => c.toUpperCase())} ya ${a.teams === 1 ? 'ganó' : 'ganaron'} este logro. Si cambias el nombre o el ícono, lo verán actualizado y conservarán su fecha de obtención.</p>`) : ''}
+    ${selected && a.teams > 0 ? safe(html`<p class="note note--blue small">${t('admin.achievements.alreadyWon', { count: a.teams })}</p>`) : ''}
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary">${icon('save', 18)}${selected ? 'Guardar' : 'Crear logro'}</button>
-      ${selected ? safe(html`<button type="button" class="btn btn-danger-outline" data-act="delete">${icon('trash', 18)}Eliminar</button>`) : ''}
+      <button type="submit" class="btn btn-primary">${icon('save', 18)}${t(selected ? 'common.save' : 'admin.achievements.create')}</button>
+      ${selected ? safe(html`<button type="button" class="btn btn-danger-outline" data-act="delete">${icon('trash', 18)}${t('common.delete')}</button>`) : ''}
     </div>`;
 }
 
@@ -159,15 +165,15 @@ async function readIcon(input) {
   input.value = '';
   if (!file) return;
   const fail = (message) => showError(form, { field: 'icon_file', message });
-  if (!ICON_TYPES.includes(file.type)) return fail('El ícono debe ser una imagen PNG o SVG.');
-  if (file.size > MAX_ICON_BYTES) return fail(`El archivo pesa ${Math.ceil(file.size / 1024)} KB; el máximo es 200 KB.`);
+  if (!ICON_TYPES.includes(file.type)) return fail(t('errors.ICON_TYPE_INVALID'));
+  if (file.size > MAX_ICON_BYTES) return fail(t('admin.achievements.fileTooBig', { size: Math.ceil(file.size / 1024), max: MAX_ICON_BYTES / 1024 }));
   if (file.type === 'image/svg+xml') {
     const text = await file.text();
-    if (/<script/i.test(text) || /\son\w+\s*=/i.test(text)) return fail('El SVG contiene código no permitido.');
+    if (/<script/i.test(text) || /\son\w+\s*=/i.test(text)) return fail(t('errors.ICON_SVG_UNSAFE'));
   }
   const reader = new FileReader();
   reader.onload = () => setIcon(String(reader.result));
-  reader.onerror = () => fail('No se pudo leer el archivo. Intenta con otro.');
+  reader.onerror = () => fail(t('admin.achievements.readError'));
   reader.readAsDataURL(file);
 }
 
@@ -184,19 +190,19 @@ async function onSubmit(e) {
     param: Number(f.param.value),
     points: Number(f.points.value),
   };
-  if (!data.name) return showError(form, { field: 'name', message: 'El nombre es obligatorio.' });
+  if (!data.name) return showError(form, { field: 'name', message: t('admin.users.nameRequired') });
   if (paramCriteria.includes(data.criterion) && !(Number.isInteger(data.param) && data.param >= 1)) {
-    return showError(form, { field: 'param', message: 'Escribe un número entero mayor que cero.' });
+    return showError(form, { field: 'param', message: t('errors.PARAM_INVALID') });
   }
   if (!Number.isInteger(data.points) || data.points < 0 || f.points.value === '') {
-    return showError(form, { field: 'points', message: 'Los puntos deben ser un número entero de 0 en adelante.' });
+    return showError(form, { field: 'points', message: t('admin.achievements.pointsInvalid') });
   }
   const btn = form.querySelector('[type="submit"]');
   try {
     const res = selected
       ? await withBusy(btn, () => put(`/admin/achievements/${selected.id}`, data))
       : await withBusy(btn, () => post('/admin/achievements', data));
-    toast(selected ? 'El logro se actualizó.' : `Se creó el logro "${data.name}".`);
+    toast(selected ? t('admin.achievements.updated') : t('admin.achievements.created', { name: data.name }));
     await load();
     select(items.find((a) => a.id === res.achievement.id) || null, false);
   } catch (err) {
@@ -206,12 +212,12 @@ async function onSubmit(e) {
 
 async function remove(btn) {
   const a = selected;
-  const extra = a.teams > 0 ? ` ${wonText(a.teams).replace(/^./, (c) => c.toUpperCase())} ${a.teams === 1 ? 'lo tiene' : 'lo tienen'} y ${a.teams === 1 ? 'lo perderá' : 'lo perderán'}.` : '';
-  const ok = await confirmDialog({ title: `¿Eliminar el logro "${a.name}"?`, message: `Esta acción no se puede deshacer.${extra}`, confirmText: 'Eliminar', danger: true });
+  const extra = a.teams > 0 ? ` ${t('admin.achievements.willLose', { count: a.teams })}` : '';
+  const ok = await confirmDialog({ title: t('admin.achievements.deleteTitle', { name: a.name }), message: `${t('common.cannotUndo')}${extra}`, confirmText: t('common.delete'), danger: true });
   if (!ok) return;
   try {
     const { teams } = await withBusy(btn, () => del(`/admin/achievements/${a.id}`));
-    toast(teams > 0 ? `Se eliminó el logro y se retiró de ${wonText(teams)}.` : 'Se eliminó el logro.');
+    toast(teams > 0 ? t('admin.achievements.deletedFrom', { count: teams }) : t('admin.achievements.deleted'));
     await load();
     select(items[0] || null, false);
   } catch (err) {

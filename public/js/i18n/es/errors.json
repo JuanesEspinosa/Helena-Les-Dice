@@ -28,7 +28,12 @@
     "SAME_PERSON": "El responsable y el revisor no pueden ser la misma persona.",
     "STUDENT_IN_OTHER_TEAM": "{name} ya pertenece al {team} en el periodo {period}. No se agregó.",
     "MEMBER_HAS_CONTRIBUTIONS": "{name} ya tiene aportes en el equipo ({count}) y no se puede quitar.",
-    "POINTS_INVALID": "Los puntos deben ser un número entero entre 0 y {max}."
+    "POINTS_INVALID": "Los puntos deben ser un número entero entre 0 y {max}.",
+    "CURRENT_PASSWORD_REQUIRED": "Escribe tu contraseña actual.",
+    "ICON_SVG_UNSAFE": "El SVG contiene código no permitido.",
+    "ICON_TYPE_INVALID": "El ícono debe ser una imagen PNG o SVG.",
+    "PARAM_INVALID": "Escribe un número entero mayor que cero.",
+    "PERIOD_DATES_INVALID": "La fecha de fin debe ser posterior a la de inicio."
   },
   "fields": {
     "generic": "Campo",
@@ -40,6 +45,16 @@
     "position": "Orden",
     "project": "Proyecto",
     "sectionName": "Nombre de la sección",
-    "teamName": "Nombre del equipo"
+    "teamName": "Nombre del equipo",
+    "criterion": "Criterio",
+    "current": "Contraseña actual",
+    "end_date": "Fecha de fin",
+    "start_date": "Fecha de inicio",
+    "fullName": "Nombre completo",
+    "icon": "Ícono",
+    "name": "Nombre",
+    "param": "Valor de N",
+    "periodName": "Nombre del periodo",
+    "points": "Puntos"
   }
 }

@@ -27,7 +27,12 @@
     },
     "actions": "Acciones",
     "edit": "Editar",
-    "saveChanges": "Guardar cambios"
+    "saveChanges": "Guardar cambios",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "saved": "Los cambios se guardaron.",
+    "cannotUndo": "Esta acción no se puede deshacer.",
+    "understood": "Entendido"
   },
   "lang": {
     "label": "Idioma"
@@ -108,5 +113,53 @@
     "adminBackups": "Copias de seguridad · Helena les dice",
     "profile": "Mi perfil · Helena les dice",
     "notifications": "Notificaciones · Helena les dice"
+  },
+  "account": {
+    "backToBoard": "Volver al tablero",
+    "backToPanel": "Volver al panel",
+    "profile": {
+      "firstTitle": "Debes cambiar tu contraseña temporal.",
+      "firstText": "Por seguridad, crea una contraseña propia antes de seguir usando la plataforma.",
+      "noTeam": "Sin equipo asignado",
+      "memberSince": "Miembro desde",
+      "lastLogin": "Último ingreso",
+      "language": "Idioma de la interfaz",
+      "contactAdmin": "Para cambiar tu nombre o correo, contacta al administrador.",
+      "changePassword": "Cambiar contraseña",
+      "passwordHint": "Mínimo 8 caracteres, con al menos un número.",
+      "confirmNew": "Confirmar nueva contraseña",
+      "updatePassword": "Actualizar contraseña",
+      "session": "Sesión",
+      "sessionText": "Tu sesión se cierra sola después de 30 minutos sin actividad.",
+      "passwordUpdated": "Tu contraseña se actualizó correctamente.",
+      "firstDone": "Listo, tu contraseña ya es personal.",
+      "continueHome": "Continuar a mi inicio"
+    },
+    "notifications": {
+      "types": {
+        "devuelta": "Sección devuelta",
+        "comentario": "Comentario nuevo",
+        "aprobada": "Sección aprobada",
+        "nivel": "Nivel desbloqueado",
+        "insignia": "Insignia ganada",
+        "revision": "Sección en revisión",
+        "other": "Aviso"
+      },
+      "today": "Hoy",
+      "thisWeek": "Esta semana",
+      "earlier": "Anteriores",
+      "unreadOne": "No leída",
+      "upToDate": "Estás al día",
+      "noUnread": "No tienes avisos sin leer.",
+      "emptyTitle": "Todavía no tienes notificaciones",
+      "emptyText": "Aquí verás las revisiones, los comentarios y los logros de tu equipo.",
+      "all": "Todas",
+      "unread": "No leídas",
+      "unreadCount": "No leídas ({count})",
+      "allRead": "Marcaste todos los avisos como leídos.",
+      "noneToRead": "No tenías avisos sin leer.",
+      "markAll": "Marcar todas como leídas",
+      "filter": "Filtrar notificaciones"
+    }
   }
 }

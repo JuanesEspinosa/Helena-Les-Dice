@@ -28,7 +28,12 @@
     "SAME_PERSON": "The author and the reviewer cannot be the same person.",
     "STUDENT_IN_OTHER_TEAM": "{name} already belongs to {team} in term {period}. They were not added.",
     "MEMBER_HAS_CONTRIBUTIONS": "{name} already has contributions in the team ({count}) and cannot be removed.",
-    "POINTS_INVALID": "Points must be a whole number between 0 and {max}."
+    "POINTS_INVALID": "Points must be a whole number between 0 and {max}.",
+    "CURRENT_PASSWORD_REQUIRED": "Enter your current password.",
+    "ICON_SVG_UNSAFE": "The SVG contains code that is not allowed.",
+    "ICON_TYPE_INVALID": "The icon must be a PNG or SVG image.",
+    "PARAM_INVALID": "Enter a whole number greater than zero.",
+    "PERIOD_DATES_INVALID": "The end date must be later than the start date."
   },
   "fields": {
     "generic": "Field",
@@ -40,6 +45,16 @@
     "position": "Order",
     "project": "Project",
     "sectionName": "Section name",
-    "teamName": "Team name"
+    "teamName": "Team name",
+    "criterion": "Criterion",
+    "current": "Current password",
+    "end_date": "End date",
+    "start_date": "Start date",
+    "fullName": "Full name",
+    "icon": "Icon",
+    "name": "Name",
+    "param": "Value of N",
+    "periodName": "Term name",
+    "points": "Points"
   }
 }

@@ -76,7 +76,9 @@ export function t(key, params = {}) {
   if (value === undefined) value = lookup(fallback, key);
   if (value === undefined) return key;
   if (value && typeof value === 'object') {
-    const form = new Intl.PluralRules(getLocale()).select(Number(params.count) || 0);
+    const count = Number(params.count) || 0;
+    // "zero" es opcional y explícito: Intl.PluralRules no lo devuelve en estos idiomas
+    const form = count === 0 && value.zero !== undefined ? 'zero' : new Intl.PluralRules(getLocale()).select(count);
     value = value[form] ?? value.other ?? key;
   }
   return interpolate(String(value), params);

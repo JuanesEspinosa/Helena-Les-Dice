@@ -27,7 +27,12 @@
     },
     "actions": "Actions",
     "edit": "Edit",
-    "saveChanges": "Save changes"
+    "saveChanges": "Save changes",
+    "delete": "Delete",
+    "save": "Save",
+    "saved": "Your changes have been saved.",
+    "cannotUndo": "This action cannot be undone.",
+    "understood": "Got it"
   },
   "lang": {
     "label": "Language"
@@ -108,5 +113,53 @@
     "adminBackups": "Backups · Helena les dice",
     "profile": "My profile · Helena les dice",
     "notifications": "Notifications · Helena les dice"
+  },
+  "account": {
+    "backToBoard": "Back to the board",
+    "backToPanel": "Back to the dashboard",
+    "profile": {
+      "firstTitle": "You must change your temporary password.",
+      "firstText": "For your security, create your own password before you continue using the platform.",
+      "noTeam": "No team assigned",
+      "memberSince": "Member since",
+      "lastLogin": "Last sign-in",
+      "language": "Interface language",
+      "contactAdmin": "To change your name or email, contact the administrator.",
+      "changePassword": "Change password",
+      "passwordHint": "At least 8 characters, including at least one number.",
+      "confirmNew": "Confirm new password",
+      "updatePassword": "Update password",
+      "session": "Session",
+      "sessionText": "Your session ends automatically after 30 minutes of inactivity.",
+      "passwordUpdated": "Your password has been updated successfully.",
+      "firstDone": "All set, your password is now your own.",
+      "continueHome": "Continue to my home page"
+    },
+    "notifications": {
+      "types": {
+        "devuelta": "Section returned",
+        "comentario": "New comment",
+        "aprobada": "Section approved",
+        "nivel": "Level unlocked",
+        "insignia": "Badge earned",
+        "revision": "Section in review",
+        "other": "Notice"
+      },
+      "today": "Today",
+      "thisWeek": "This week",
+      "earlier": "Earlier",
+      "unreadOne": "Unread",
+      "upToDate": "You're all caught up",
+      "noUnread": "You have no unread notifications.",
+      "emptyTitle": "You have no notifications yet",
+      "emptyText": "Here you will see your team's reviews, comments and achievements.",
+      "all": "All",
+      "unread": "Unread",
+      "unreadCount": "Unread ({count})",
+      "allRead": "All notifications have been marked as read.",
+      "noneToRead": "You had no unread notifications.",
+      "markAll": "Mark all as read",
+      "filter": "Filter notifications"
+    }
   }
 }
