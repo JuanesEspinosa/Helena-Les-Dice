@@ -199,7 +199,16 @@ export function langSelect({ id, value, onChange }) {
     option.selected = code === value;
     select.appendChild(option);
   });
-  select.addEventListener('change', () => onChange(select.value));
-  wrap.append(label, select);
+  // Código de 2 letras ("PT") que la cabecera muestra en pantallas estrechas en lugar del nombre
+  // recortado. Es solo visual: el select conserva su etiqueta y la lista abierta muestra los nombres.
+  const code = document.createElement('span');
+  code.className = 'lang-select__code';
+  code.setAttribute('aria-hidden', 'true');
+  code.textContent = select.value.toUpperCase();
+  select.addEventListener('change', () => {
+    code.textContent = select.value.toUpperCase();
+    onChange(select.value);
+  });
+  wrap.append(label, select, code);
   return wrap;
 }
