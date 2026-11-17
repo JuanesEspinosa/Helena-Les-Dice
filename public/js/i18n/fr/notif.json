@@ -1,24 +1,24 @@
 {
   "notif": {
     "revision": {
-      "submitted": { "title": "{team} submitted “{section}” for review", "body": "{user} finished the section and is waiting for your review." },
-      "approved": { "title": "“{section}” was approved", "body": "Reviewed by {reviewer}." },
-      "approvedNote": { "title": "“{section}” was approved", "body": "{reviewer}: “{note}”" },
-      "returned": { "title": "“{section}” was returned with feedback", "body": "{reviewer}: “{note}”" }
+      "submitted": { "title": "{team} a soumis « {section} » à la relecture", "body": "{user} a terminé la section et attend votre relecture." },
+      "approved": { "title": "« {section} » a été approuvée", "body": "Relue par {reviewer}." },
+      "approvedNote": { "title": "« {section} » a été approuvée", "body": "{reviewer} : « {note} »" },
+      "returned": { "title": "« {section} » a été renvoyée avec des observations", "body": "{reviewer} : « {note} »" }
     },
     "comment": {
-      "new": { "title": "New comment on “{section}”", "body": "{user}: “{excerpt}”" },
-      "reply": { "title": "{user} replied on “{section}”", "body": "{user}: “{excerpt}”" }
+      "new": { "title": "Nouveau commentaire sur « {section} »", "body": "{user} : « {excerpt} »" },
+      "reply": { "title": "{user} a répondu sur « {section} »", "body": "{user} : « {excerpt} »" }
     },
     "team": {
-      "added": { "title": "You were added to {team}", "body": "You are now part of {team} in term {period}." }
+      "added": { "title": "Vous avez rejoint {team}", "body": "Vous faites désormais partie de {team} pour la période {period}." }
     },
     "level": {
-      "unlocked": { "title": "Level {nextN} unlocked: {nextLevel}!", "body": "You completed level {n} · {level} and earned {points} points." },
-      "allDone": { "title": "You completed every level of the document!", "body": "You completed level {n} · {level} and earned {points} points." }
+      "unlocked": { "title": "Le niveau {nextN} est débloqué : {nextLevel} !", "body": "Vous avez terminé le niveau {n} · {level} et gagné {points} points." },
+      "allDone": { "title": "Vous avez terminé tous les niveaux du document !", "body": "Vous avez terminé le niveau {n} · {level} et gagné {points} points." }
     },
     "badge": {
-      "earned": { "title": "You earned the “{name}” badge!", "body": "{description} · +{points} points" }
+      "earned": { "title": "Vous avez obtenu le badge « {name} » !", "body": "{description} · +{points} points" }
     }
   }
 }

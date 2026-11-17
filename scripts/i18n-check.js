@@ -79,10 +79,12 @@ function checkKeys({ quiet = false } = {}) {
 
 function checkUntranslated() {
   const base = loadLang(BASE);
-  const allowed = new Set(allowlist.untranslated);
+  // "*": claves que solo tienen marcadores (iguales en todo idioma); "<idioma>": palabras que ese idioma comparte con el español
+  const allowedFor = (lang) => new Set([...(allowlist.untranslated['*'] || []), ...(allowlist.untranslated[lang] || [])]);
   const failures = [];
   for (const lang of EXTRA) {
     const dict = loadLang(lang);
+    const allowed = allowedFor(lang);
     for (const [key, value] of Object.entries(base)) {
       if (!allowed.has(key) && JSON.stringify(dict[key]) === JSON.stringify(value)) failures.push(`${lang}: ${key}`);
     }
