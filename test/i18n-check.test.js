@@ -63,3 +63,20 @@ test('las cadenas, plantillas y comentarios siguen la regla del spec', () => {
   assert.match(r.out, /equipo nuevo/);
   assert.match(r.out, /2 literales/);
 });
+
+test('los chequeos del repositorio (claves, literales, códigos y locales) pasan', () => {
+  const r = spawnSync(process.execPath, [SCRIPT], { encoding: 'utf8' });
+
+  assert.equal(r.status, 0, r.stdout);
+  assert.match(r.stdout, /keys OK \(6 idiomas, \d+ claves\)/);
+  assert.match(r.stdout, /literals OK \(0\)/);
+  assert.match(r.stdout, /codes OK \(0\)/);
+  assert.match(r.stdout, /locales OK \(0\)/);
+});
+
+test('el chequeo de no traducidos del repositorio pasa', () => {
+  const r = spawnSync(process.execPath, [SCRIPT, 'untranslated'], { encoding: 'utf8' });
+
+  assert.equal(r.status, 0, r.stdout);
+  assert.match(r.stdout, /untranslated OK \(0\)/);
+});

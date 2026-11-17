@@ -150,3 +150,63 @@ test('un error con un código sin traducción muestra el mensaje del servidor', 
 
   assert.equal(text, 'Mensaje del servidor en español.');
 });
+
+test('un error de campo obligatorio nombra el campo traducido según field, o "campo" si no se conoce', async () => {
+  globalThis.document = fakeDocument([]);
+  globalThis.fetch = servingFetch;
+  await i18n.initI18n('en');
+
+  const known = i18n.tError({ code: 'TEXT_REQUIRED', field: 'name', params: { max: 5 }, message: 'Falta el nombre.' });
+  const unknown = i18n.tError({ code: 'TEXT_REQUIRED', field: 'campo_raro', message: 'Falta el dato.' });
+
+  assert.equal(known, 'Please fill in the “Name” field.');
+  assert.equal(unknown, 'Please fill in the “Field” field.');
+});
+
+test('un código de error que falta en el idioma activo pero existe en español se muestra en español, no con el mensaje del servidor', async () => {
+  globalThis.document = fakeDocument([]);
+  globalThis.fetch = async (url) => {
+    const res = await servingFetch(url);
+    if (!url.endsWith('/en/errors.json')) return res;
+    const data = await res.json();
+    const { SESSION_IDLE, ...errors } = data.errors;
+    return { ok: true, json: async () => ({ ...data, errors }) };
+  };
+  await i18n.initI18n('en');
+
+  assert.equal(i18n.has('errors.SESSION_IDLE'), true);
+  assert.equal(i18n.tError({ code: 'SESSION_IDLE', message: 'mensaje del servidor' }), 'Tu sesión se cerró por 30 minutos de inactividad.');
+});
+
+test('ago() dice "ahora mismo", "hace N min" y "ayer, hora" según el tiempo transcurrido', async () => {
+  globalThis.document = fakeDocument([]);
+  globalThis.fetch = servingFetch;
+  await i18n.initI18n('en');
+  const yesterdayNoon = new Date();
+  yesterdayNoon.setDate(yesterdayNoon.getDate() - 1);
+  yesterdayNoon.setHours(12, 0, 0, 0);
+
+  assert.equal(i18n.ago(new Date(Date.now() - 10 * 1000)), 'Just now');
+  assert.equal(i18n.ago(new Date(Date.now() - 5 * 60 * 1000)), '5 min. ago');
+  assert.equal(i18n.ago(yesterdayNoon), 'Yesterday, 12:00 PM');
+  assert.equal(i18n.ago(null), 'No activity');
+});
+
+test('los números que entran en un texto traducido se formatean según el idioma', async () => {
+  globalThis.document = fakeDocument([]);
+  globalThis.fetch = servingFetch;
+  await i18n.initI18n('de');
+
+  assert.equal(i18n.t('student.points', { count: 1234 }), '1.234 Punkte');
+});
+
+test('un código de idioma inválido carga el español', async () => {
+  globalThis.document = fakeDocument([]);
+  globalThis.fetch = servingFetch;
+
+  const lang = await i18n.initI18n('xx');
+
+  assert.equal(lang, 'es');
+  assert.equal(globalThis.document.documentElement.lang, 'es-CO');
+  assert.equal(i18n.t('common.cancel'), 'Cancelar');
+});
