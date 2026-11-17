@@ -1,0 +1,63 @@
+{
+  "common": {
+    "subject": "IT Project Management",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "loading": "Loading"
+  },
+  "lang": {
+    "label": "Language"
+  },
+  "status": {
+    "redaccion": "Drafting",
+    "revision": "In review",
+    "aprobado": "Approved",
+    "devuelto": "Returned"
+  },
+  "time": {
+    "never": "No activity",
+    "justNow": "Just now",
+    "todayAt": "Today, {time}",
+    "yesterdayAt": "Yesterday, {time}"
+  },
+  "roles": {
+    "estudiante": "Student",
+    "docente": "Teacher",
+    "administrador": "Administrator"
+  },
+  "menu": {
+    "estudiante": {
+      "tablero": "Level board",
+      "integrantes": "Team members",
+      "logros": "Achievements and badges",
+      "historial": "Version history"
+    },
+    "docente": {
+      "panel": "Progress dashboard",
+      "equipos": "Teams",
+      "niveles": "Configure levels",
+      "comentarios": "Comments"
+    },
+    "administrador": {
+      "panel": "Dashboard",
+      "usuarios": "Users",
+      "periodos": "Academic terms",
+      "logros": "Achievement catalog",
+      "backups": "Backups"
+    }
+  },
+  "layout": {
+    "subtitle": "{subject} · {detail}",
+    "noTeam": "No team",
+    "teacherPanel": "Teacher dashboard",
+    "adminSubtitle": "Platform administration",
+    "openMenu": "Open menu",
+    "mainMenu": "Main menu",
+    "notifications": "Notifications",
+    "notificationsUnread": { "one": "Notifications, {count} unread", "other": "Notifications, {count} unread" },
+    "myProfile": "My profile",
+    "logout": "Sign out",
+    "progress": "Document progress",
+    "approvedOf": { "one": "{approved} of {count} section approved", "other": "{approved} of {count} sections approved" }
+  }
+}

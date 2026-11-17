@@ -1,0 +1,35 @@
+{
+  "errors": {
+    "UNEXPECTED": "Ocurrió un error inesperado.",
+    "OFFLINE": "No hay conexión con el servidor. Revisa tu internet e intenta de nuevo.",
+    "SERVER_ERROR": "Ocurrió un error en el servidor. Intenta de nuevo.",
+    "ROUTE_NOT_FOUND": "Ruta no encontrada.",
+    "JSON_REQUIRED": "Las peticiones deben enviarse en formato JSON.",
+    "JSON_INVALID": "El cuerpo de la petición no es JSON válido.",
+    "PAYLOAD_TOO_LARGE": "El contenido enviado es demasiado grande.",
+    "DUPLICATE": "Ya existe un registro con esos datos.",
+    "FK_CONFLICT": "El registro está relacionado con otros datos y no se puede modificar así.",
+    "SESSION_IDLE": "Tu sesión se cerró por 30 minutos de inactividad.",
+    "SESSION_ENDED": "Tu sesión terminó. Vuelve a iniciar sesión.",
+    "NO_SESSION": "Inicia sesión para continuar.",
+    "FORBIDDEN": "No tienes permiso para esta acción.",
+    "AUTH_INVALID": "Correo o contraseña incorrectos.",
+    "ACCOUNT_LOCKED": "Tu cuenta está bloqueada por intentos fallidos. Intenta de nuevo en {minutes} minutos.",
+    "RESET_EXPIRED": "Este enlace expiró. Solicita uno nuevo.",
+    "LANG_INVALID": "Elige uno de los idiomas disponibles.",
+    "TEXT_REQUIRED": "Completa el campo «{field}».",
+    "TEXT_TOO_LONG": "El campo «{field}» admite como máximo {max} caracteres.",
+    "EMAIL_INVALID": "Escribe un correo con formato válido.",
+    "INT_INVALID": "El valor de «{field}» no es válido.",
+    "PASSWORD_SHORT": "La contraseña debe tener al menos 8 caracteres.",
+    "PASSWORD_NO_DIGIT": "La contraseña debe tener al menos un número.",
+    "PASSWORD_LONG": "La contraseña es demasiado larga.",
+    "PASSWORD_MISMATCH": "Las contraseñas no coinciden."
+  },
+  "fields": {
+    "generic": "Campo",
+    "email": "Correo",
+    "password": "Contraseña",
+    "token": "Enlace"
+  }
+}

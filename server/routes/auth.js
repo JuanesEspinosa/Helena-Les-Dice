@@ -25,7 +25,7 @@ router.post('/login', ah(async (req, res, next) => {
 
   if (user && user.locked_until && new Date(user.locked_until) > new Date()) {
     const mins = Math.ceil((new Date(user.locked_until) - new Date()) / 60000);
-    throw new HttpError(423, `Tu cuenta está bloqueada por intentos fallidos. Intenta de nuevo en ${mins} minuto(s).`);
+    throw new HttpError(423, `Tu cuenta está bloqueada por intentos fallidos. Intenta de nuevo en ${mins} minuto(s).`, undefined, { code: 'ACCOUNT_LOCKED', params: { minutes: mins } });
   }
   const ok = user && user.active && (await bcrypt.compare(password, user.password_hash));
   if (!ok) {
@@ -36,10 +36,10 @@ router.post('/login', ah(async (req, res, next) => {
         `UPDATE users SET failed_attempts = $1, locked_until = $2 WHERE id = $3`,
         [lock ? 0 : attempts, lock ? new Date(Date.now() + LOCK_MINUTES * 60000) : null, user.id]
       );
-      if (lock) throw new HttpError(423, `Superaste los ${MAX_ATTEMPTS} intentos. Tu cuenta quedó bloqueada ${LOCK_MINUTES} minutos.`);
-      throw new HttpError(401, `${generic} Te quedan ${MAX_ATTEMPTS - attempts} intento(s) antes del bloqueo de ${LOCK_MINUTES} minutos.`);
+      if (lock) throw new HttpError(423, `Superaste los ${MAX_ATTEMPTS} intentos. Tu cuenta quedó bloqueada ${LOCK_MINUTES} minutos.`, undefined, { code: 'ACCOUNT_LOCKED', params: { minutes: LOCK_MINUTES } });
+      throw new HttpError(401, `${generic} Te quedan ${MAX_ATTEMPTS - attempts} intento(s) antes del bloqueo de ${LOCK_MINUTES} minutos.`, undefined, { code: 'AUTH_INVALID', params: { remaining: MAX_ATTEMPTS - attempts, lockMinutes: LOCK_MINUTES } });
     }
-    throw new HttpError(401, generic);
+    throw new HttpError(401, generic, undefined, { code: 'AUTH_INVALID' });
   }
 
   await tx(async (client) => {
@@ -63,7 +63,7 @@ router.post('/logout', (req, res) => {
 });
 
 router.get('/me', (req, res) => {
-  if (!req.session || !req.session.user) throw new HttpError(401, 'Sin sesión');
+  if (!req.session || !req.session.user) throw new HttpError(401, 'Sin sesión', undefined, { code: 'NO_SESSION' });
   res.json({ user: req.session.user, home: HOME[req.session.user.role] });
 });
 
@@ -92,7 +92,7 @@ router.get('/reset/:token', ah(async (req, res) => {
     'SELECT id FROM password_resets WHERE token_hash = $1 AND NOT used AND expires_at > now()',
     [hashToken(req.params.token)]
   );
-  if (!row) throw new HttpError(410, 'Este enlace expiró. Solicita uno nuevo.');
+  if (!row) throw new HttpError(410, 'Este enlace expiró. Solicita uno nuevo.', undefined, { code: 'RESET_EXPIRED' });
   res.json({ valid: true });
 }));
 
@@ -105,7 +105,7 @@ router.post('/reset', ah(async (req, res) => {
         WHERE token_hash = $1 AND NOT used AND expires_at > now() RETURNING user_id`,
       [hashToken(token)]
     );
-    if (!rows[0]) throw new HttpError(410, 'Este enlace expiró. Solicita uno nuevo.');
+    if (!rows[0]) throw new HttpError(410, 'Este enlace expiró. Solicita uno nuevo.', undefined, { code: 'RESET_EXPIRED' });
     const hash = await bcrypt.hash(req.body.password, 10);
     await client.query(
       'UPDATE users SET password_hash = $1, must_change_password = FALSE, failed_attempts = 0, locked_until = NULL WHERE id = $2',

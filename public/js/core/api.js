@@ -1,10 +1,18 @@
 // Cliente de la API: fetch con JSON, manejo de errores y redirección al login en 401
+import { t, tError } from './i18n.js';
 
+/**
+ * Error de la API. `message` ya viene traducido por `code` (con respaldo en el español del
+ * servidor, que queda en `serverMessage`), así que las páginas pueden mostrarlo tal cual.
+ */
 export class ApiError extends Error {
-  constructor(status, message, field) {
-    super(message);
+  constructor(status, { error, field, code, params } = {}) {
+    super(tError({ code, params, field, message: error }));
     this.status = status;
     this.field = field;
+    this.code = code;
+    this.params = params;
+    this.serverMessage = error;
   }
 }
 
@@ -25,16 +33,15 @@ export async function api(path, { method = 'GET', body, background = false, raw 
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new ApiError(0, 'No hay conexión con el servidor. Revisa tu internet e intenta de nuevo.');
+    throw new ApiError(0, { code: 'OFFLINE', error: t('errors.OFFLINE') });
   }
   if (raw && res.ok) return res;
   const data = await res.json().catch(() => ({}));
   if (res.status === 401 && !path.startsWith('/auth/login')) {
-    const msg = encodeURIComponent(data.error || 'Tu sesión terminó.');
-    location.href = `/index.html?expirada=${msg}`;
-    throw new ApiError(401, data.error || 'Sesión terminada');
+    location.href = `/index.html?expirada=${encodeURIComponent(data.code || 'SESSION_ENDED')}`;
+    throw new ApiError(401, { code: data.code || 'SESSION_ENDED', error: data.error });
   }
-  if (!res.ok) throw new ApiError(res.status, data.error || 'Ocurrió un error inesperado.', data.field);
+  if (!res.ok) throw new ApiError(res.status, { ...data, error: data.error || t('errors.UNEXPECTED') });
   return data;
 }
 

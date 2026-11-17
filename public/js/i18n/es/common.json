@@ -1,0 +1,63 @@
+{
+  "common": {
+    "subject": "Gestión de proyectos TI",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "loading": "Cargando"
+  },
+  "lang": {
+    "label": "Idioma"
+  },
+  "status": {
+    "redaccion": "En redacción",
+    "revision": "En revisión",
+    "aprobado": "Aprobado",
+    "devuelto": "Devuelto"
+  },
+  "time": {
+    "never": "Sin actividad",
+    "justNow": "Hace un momento",
+    "todayAt": "Hoy, {time}",
+    "yesterdayAt": "Ayer, {time}"
+  },
+  "roles": {
+    "estudiante": "Estudiante",
+    "docente": "Docente",
+    "administrador": "Administrador"
+  },
+  "menu": {
+    "estudiante": {
+      "tablero": "Tablero de niveles",
+      "integrantes": "Integrantes",
+      "logros": "Logros e insignias",
+      "historial": "Historial de versiones"
+    },
+    "docente": {
+      "panel": "Panel de seguimiento",
+      "equipos": "Equipos",
+      "niveles": "Configurar niveles",
+      "comentarios": "Comentarios"
+    },
+    "administrador": {
+      "panel": "Panel",
+      "usuarios": "Usuarios",
+      "periodos": "Periodos académicos",
+      "logros": "Catálogo de logros",
+      "backups": "Copias de seguridad"
+    }
+  },
+  "layout": {
+    "subtitle": "{subject} · {detail}",
+    "noTeam": "Sin equipo",
+    "teacherPanel": "Panel docente",
+    "adminSubtitle": "Administración de la plataforma",
+    "openMenu": "Abrir menú",
+    "mainMenu": "Menú principal",
+    "notifications": "Notificaciones",
+    "notificationsUnread": { "one": "Notificaciones, {count} sin leer", "other": "Notificaciones, {count} sin leer" },
+    "myProfile": "Mi perfil",
+    "logout": "Cerrar sesión",
+    "progress": "Avance del documento",
+    "approvedOf": { "one": "{approved} de {count} sección aprobada", "other": "{approved} de {count} secciones aprobadas" }
+  }
+}

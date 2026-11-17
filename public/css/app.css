@@ -217,6 +217,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .field.has-error .input, .field.has-error .select, .field.has-error .textarea { border-color: var(--danger); background: #FFFBFA; }
 .field-error { display: none; align-items: center; gap: 6px; color: var(--danger); font-size: 13px; font-weight: 600; }
 .field.has-error .field-error { display: flex; }
+.lang-select .select { min-height: 44px; width: auto; padding-right: 32px; }
 .input-icon { position: relative; }
 .input-icon > svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
 .input-icon > .input { padding-left: 42px; }

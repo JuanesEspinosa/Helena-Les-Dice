@@ -1,0 +1,35 @@
+{
+  "errors": {
+    "UNEXPECTED": "An unexpected error occurred.",
+    "OFFLINE": "Unable to reach the server. Check your internet connection and try again.",
+    "SERVER_ERROR": "A server error occurred. Please try again.",
+    "ROUTE_NOT_FOUND": "Route not found.",
+    "JSON_REQUIRED": "Requests must be sent in JSON format.",
+    "JSON_INVALID": "The request body is not valid JSON.",
+    "PAYLOAD_TOO_LARGE": "The submitted content is too large.",
+    "DUPLICATE": "A record with that information already exists.",
+    "FK_CONFLICT": "This record is linked to other data and cannot be changed this way.",
+    "SESSION_IDLE": "Your session was closed after 30 minutes of inactivity.",
+    "SESSION_ENDED": "Your session has ended. Please sign in again.",
+    "NO_SESSION": "Please sign in to continue.",
+    "FORBIDDEN": "You do not have permission to perform this action.",
+    "AUTH_INVALID": "Incorrect email or password.",
+    "ACCOUNT_LOCKED": "Your account is locked due to failed attempts. Try again in {minutes} minutes.",
+    "RESET_EXPIRED": "This link has expired. Please request a new one.",
+    "LANG_INVALID": "Choose one of the available languages.",
+    "TEXT_REQUIRED": "Please fill in the “{field}” field.",
+    "TEXT_TOO_LONG": "The “{field}” field allows at most {max} characters.",
+    "EMAIL_INVALID": "Enter a valid email address.",
+    "INT_INVALID": "The value of “{field}” is not valid.",
+    "PASSWORD_SHORT": "The password must be at least 8 characters long.",
+    "PASSWORD_NO_DIGIT": "The password must contain at least one number.",
+    "PASSWORD_LONG": "The password is too long.",
+    "PASSWORD_MISMATCH": "The passwords do not match."
+  },
+  "fields": {
+    "generic": "Field",
+    "email": "Email",
+    "password": "Password",
+    "token": "Link"
+  }
+}

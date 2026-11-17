@@ -1,4 +1,5 @@
 // Utilidades de interfaz compartidas: escape de HTML, íconos, avisos, formularios y fechas
+import { t, tError } from './i18n.js';
 
 /** Escapa texto para insertarlo en HTML (evita XSS). Usar SIEMPRE con datos del servidor. */
 export function esc(value) {
@@ -101,7 +102,13 @@ export function badgeIcon(iconValue, size = 28) {
 }
 
 // ---------- Estados de sección ----------
-export const STATUS_LABEL = { redaccion: 'En redacción', revision: 'En revisión', aprobado: 'Aprobado', devuelto: 'Devuelto' };
+// Las claves son los estados que guarda el servidor; el texto sale del idioma activo
+export const STATUS_LABEL = Object.freeze({
+  get redaccion() { return t('status.redaccion'); },
+  get revision() { return t('status.revision'); },
+  get aprobado() { return t('status.aprobado'); },
+  get devuelto() { return t('status.devuelto'); },
+});
 export const pill = (status, label) => safe(`<span class="pill pill-${esc(status)}">${esc(label || STATUS_LABEL[status] || status)}</span>`);
 
 /** Iniciales para los avatares: "Laura Gómez" → "LG". */
@@ -110,37 +117,8 @@ export function initials(name = '') {
 }
 export const avatar = (name, cls = '') => safe(`<span class="avatar ${cls}" aria-hidden="true">${esc(initials(name))}</span>`);
 
-// ---------- Fechas ----------
-const dtf = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
-const dtfTime = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
-const tf = new Intl.DateTimeFormat('es-CO', { hour: 'numeric', minute: '2-digit' });
-
-export const fmtDate = (d) => (d ? dtf.format(new Date(d)) : '—');
-export const fmtDateTime = (d) => (d ? dtfTime.format(new Date(d)) : '—');
-
-/** "Hace 5 min", "Hoy, 9:02 a. m.", "Ayer, 6:15 p. m.", "Hace 3 días"… */
-export function ago(d) {
-  if (!d) return 'Sin actividad';
-  const date = new Date(d);
-  const diff = (Date.now() - date) / 1000;
-  if (diff < 60) return 'Hace un momento';
-  if (diff < 3600) return `Hace ${Math.floor(diff / 60)} min`;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-  if (date >= today) return `Hoy, ${tf.format(date)}`;
-  if (date >= yesterday) return `Ayer, ${tf.format(date)}`;
-  const days = Math.floor(diff / 86400);
-  if (days < 30) return `Hace ${days} días`;
-  return fmtDate(date);
-}
-
-export function fmtBytes(n) {
-  if (n == null) return '—';
-  const u = ['B', 'KB', 'MB', 'GB'];
-  let i = 0; let v = Number(n);
-  while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
-  return `${v.toFixed(i ? 1 : 0)} ${u[i]}`;
-}
+// ---------- Fechas y números (según el idioma activo) ----------
+export { fmtDate, fmtDateTime, fmtTime, ago, fmtBytes, fmtNumber, fmtPercent } from './i18n.js';
 
 // ---------- Avisos flotantes ----------
 export function toast(message, type = 'ok') {
@@ -186,16 +164,16 @@ export function showError(form, err) {
       msg.className = 'field-error';
       field.appendChild(msg);
     }
-    msg.innerHTML = html`${icon('alert', 16)}<span>${err.message}</span>`;
+    msg.innerHTML = html`${icon('alert', 16)}<span>${tError(err)}</span>`;
     input.focus();
     return;
   }
   const box = form && form.querySelector('.form-alert');
   if (box) {
-    box.innerHTML = html`<div class="alert alert-error" role="alert">${icon('alert', 20)}<div>${err.message}</div></div>`;
+    box.innerHTML = html`<div class="alert alert-error" role="alert">${icon('alert', 20)}<div>${tError(err)}</div></div>`;
     return;
   }
-  toast(err.message || 'Ocurrió un error.', 'error');
+  toast(tError(err), 'error');
 }
 
 /** Objeto con los valores del formulario. */
@@ -216,7 +194,7 @@ export async function withBusy(button, fn) {
 }
 
 /** Ventana de confirmación accesible con <dialog>. Devuelve true si el usuario confirma. */
-export function confirmDialog({ title, message, confirmText = 'Confirmar', danger = false }) {
+export function confirmDialog({ title, message, confirmText = t('common.confirm'), danger = false }) {
   return new Promise((resolve) => {
     const dlg = document.createElement('dialog');
     dlg.className = 'modal';
@@ -224,7 +202,7 @@ export function confirmDialog({ title, message, confirmText = 'Confirmar', dange
       <h2 class="modal__title">${title}</h2>
       <p class="muted">${message}</p>
       <div class="form-actions" style="justify-content:flex-end">
-        <button type="button" class="btn btn-ghost" data-v="0">Cancelar</button>
+        <button type="button" class="btn btn-ghost" data-v="0">${t('common.cancel')}</button>
         <button type="button" class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-v="1">${confirmText}</button>
       </div></div>`;
     document.body.appendChild(dlg);
@@ -246,7 +224,7 @@ export const emptyState = (iconName, title, text = '', action = '') => safe(html
   ${action ? safe(action) : ''}
 </div>`);
 
-export const loading = () => safe('<div class="page-loading"><span class="spinner" aria-label="Cargando"></span></div>');
+export const loading = () => safe(html`<div class="page-loading"><span class="spinner" aria-label="${t('common.loading')}"></span></div>`);
 
 /** Lee un parámetro de la URL. */
 export const param = (name) => new URLSearchParams(location.search).get(name);
