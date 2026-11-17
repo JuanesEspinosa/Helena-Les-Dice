@@ -1,5 +1,5 @@
 // Cliente de la API: fetch con JSON, manejo de errores y redirección al login en 401
-import { t, tError } from './i18n.js';
+import { tError } from './i18n.js';
 
 /**
  * Error de la API. `message` ya viene traducido por `code` (con respaldo en el español del
@@ -33,7 +33,7 @@ export async function api(path, { method = 'GET', body, background = false, raw 
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new ApiError(0, { code: 'OFFLINE', error: t('errors.OFFLINE') });
+    throw new ApiError(0, { code: 'OFFLINE' });
   }
   if (raw && res.ok) return res;
   const data = await res.json().catch(() => ({}));
@@ -41,7 +41,7 @@ export async function api(path, { method = 'GET', body, background = false, raw 
     location.href = `/index.html?expirada=${encodeURIComponent(data.code || 'SESSION_ENDED')}`;
     throw new ApiError(401, { code: data.code || 'SESSION_ENDED', error: data.error });
   }
-  if (!res.ok) throw new ApiError(res.status, { ...data, error: data.error || t('errors.UNEXPECTED') });
+  if (!res.ok) throw new ApiError(res.status, data);
   return data;
 }
 

@@ -56,14 +56,17 @@ export async function initI18n(code) {
   return lang;
 }
 
-const lookup = (obj, key) => key.split('.').reduce((node, part) => (node == null ? undefined : node[part]), obj);
+const hasOwn = (obj, prop) => obj != null && typeof obj === 'object' && Object.prototype.hasOwnProperty.call(obj, prop);
+
+/** Valor de una clave "a.b.c". Solo propiedades propias: "constructor" o "__proto__" no son claves. */
+const lookup = (obj, key) => key.split('.').reduce((node, part) => (hasOwn(node, part) ? node[part] : undefined), obj);
 
 /** true si la clave existe en el idioma activo o en el español. */
 export const has = (key) => lookup(dict, key) !== undefined || lookup(fallback, key) !== undefined;
 
 function interpolate(text, params) {
   return text.replace(/\{(\w+)\}/g, (match, name) => {
-    if (!(name in params)) return match;
+    if (!hasOwn(params, name)) return match;
     const value = params[name];
     return typeof value === 'number' ? fmtNumber(value) : String(value ?? '');
   });
@@ -86,24 +89,33 @@ export function t(key, params = {}) {
   return interpolate(String(value), params);
 }
 
-/** Mensaje de un error de la API: traducción por código, con respaldo en el mensaje del servidor. */
+/**
+ * Mensaje de un error de la API: traducción por código, con respaldo en el mensaje del servidor.
+ * Si tampoco hay diccionario (no cargó), se muestra el código, nunca una clave "errors.X".
+ */
 export function tError(err) {
-  if (!err) return t('errors.UNEXPECTED');
-  const key = `errors.${err.code}`;
-  if (err.code && has(key)) {
+  const key = `errors.${err && err.code}`;
+  if (err && err.code && has(key)) {
     const field = err.field && has(`fields.${err.field}`) ? t(`fields.${err.field}`) : t('fields.generic');
     return t(key, { field, ...(err.params || {}) });
   }
-  return err.message || t('errors.UNEXPECTED');
+  if (err && err.message) return err.message;
+  if (has('errors.UNEXPECTED')) return t('errors.UNEXPECTED');
+  return (err && err.code) || 'ERROR';
 }
 
-/** Traduce los elementos con data-i18n="clave" y data-i18n-attr="atributo:clave;atributo:clave". */
+/**
+ * Traduce los elementos con data-i18n="clave" y data-i18n-attr="atributo:clave;atributo:clave".
+ * Una clave sin traducción (p. ej. si el diccionario no cargó) deja el texto español del HTML.
+ */
 export function applyI18n(root = document) {
-  root.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  root.querySelectorAll('[data-i18n]').forEach((el) => {
+    if (has(el.dataset.i18n)) el.textContent = t(el.dataset.i18n);
+  });
   root.querySelectorAll('[data-i18n-attr]').forEach((el) => {
     el.dataset.i18nAttr.split(';').forEach((pair) => {
       const [attr, key] = pair.split(':').map((s) => s.trim());
-      if (attr && key) el.setAttribute(attr, t(key));
+      if (attr && key && has(key)) el.setAttribute(attr, t(key));
     });
   });
 }

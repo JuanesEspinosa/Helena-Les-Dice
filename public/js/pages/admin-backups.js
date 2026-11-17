@@ -108,13 +108,13 @@ async function requestBackup(password) {
       body: JSON.stringify({ password }),
     });
   } catch {
-    throw new ApiError(0, { code: 'OFFLINE', error: t('errors.OFFLINE') });
+    throw new ApiError(0, { code: 'OFFLINE' });
   }
   const data = await res.json().catch(() => ({}));
   if (res.status === 401 && data.field !== 'password') {
     location.href = `/index.html?expirada=${encodeURIComponent(data.code || 'SESSION_ENDED')}`;
   }
-  if (!res.ok) throw new ApiError(res.status, { ...data, error: data.error || t('errors.UNEXPECTED') });
+  if (!res.ok) throw new ApiError(res.status, data);
   return data.backup;
 }
 
