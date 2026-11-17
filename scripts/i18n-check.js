@@ -185,15 +185,23 @@ const ATTRS_RE = /\b(?:title|aria-label|placeholder|alt)\s*=\s*("([^"]*)"|'([^']
  * datos (<del>, href="/docente/equipo.html", data-decision="devolver") no son texto de interfaz.
  * Un trozo de plantilla puede empezar o terminar a mitad de una etiqueta.
  */
+// Una etiqueta empieza por "<" + letra, "/" o "!"; un "<" suelto ("Menos < de 5") no es marcado
+const TAG_RE = /<\/?[a-zA-Z!][^>]*>/g;
+const TAG_OPEN_AT_END_RE = /<\/?[a-zA-Z!][^>]*$/;
+// Trozo que empieza dentro de una etiqueta: cierra un atributo ("), sigue con otro (` x=`) o cierra (`>`)
+const TAG_TAIL_RE = /^(?:["']|\s*\/?>|\s+[\w:-]+=)/;
+
 function htmlTexts(fragment) {
   const texts = [...fragment.matchAll(ATTRS_RE)].map((m) => m[2] ?? m[3]);
-  const visible = fragment.replace(/<[^>]*>/g, ' ').replace(/<[^>]*$/, ' ').replace(/^[^<]*>/, ' ');
+  let visible = fragment.replace(TAG_RE, ' ').replace(TAG_OPEN_AT_END_RE, ' ');
+  if (TAG_TAIL_RE.test(visible)) visible = visible.replace(/^[^<]*?>/, ' ');
   texts.push(visible.replace(/&nbsp;|&middot;|&amp;|&[a-z]+;/g, ' '));
   return texts;
 }
 
-/** Un literal de JS que contiene HTML se revisa como HTML; si no, entero. */
-const jsLiteralIsSpanish = (text) => (/[<>]/.test(text) ? htmlTexts(text).some(isSpanish) : isSpanish(text));
+/** Un literal de JS que contiene marcado HTML se revisa como HTML; si no (p. ej. un "<" suelto), entero. */
+const isHtmlFragment = (text) => /<\/?[a-zA-Z!]/.test(text) || (TAG_TAIL_RE.test(text) && text.includes('>'));
+const jsLiteralIsSpanish = (text) => (isHtmlFragment(text) ? htmlTexts(text).some(isSpanish) : isSpanish(text));
 
 function htmlLiterals(src) {
   const cleaned = src
