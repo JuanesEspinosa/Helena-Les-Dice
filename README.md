@@ -90,7 +90,7 @@ La interfaz está en español (por defecto), inglés, portugués de Brasil, fran
 - **Añadir una clave:** escríbela en `es` y en los otros cinco idiomas, y úsala con `t('área.vista.clave', { variable })` (o `data-i18n="clave"` en el HTML). Los plurales son objetos `{ "one": "…", "other": "…" }` que se eligen por `count`.
 - **Errores del servidor:** cada error lleva un `code` estable; su texto vive en `errors.json` (`errors.<CODE>`). El mensaje en español del servidor queda como respaldo.
 - **Añadir un idioma:** agrega su código y locale en `LANGS` (`public/js/core/i18n.js`) y en el `CHECK` de `users.lang` (`db/schema.sql` y `db/migrate.js`), y crea su carpeta de diccionarios.
-- **Verificar:** `npm run i18n:check` (mismas claves en los 6 idiomas y ningún texto en español escrito en el código); `node scripts/i18n-check.js untranslated` lista lo que quedó igual al español.
+- **Verificar:** `npm run i18n:check` revisa que los 6 idiomas tengan las mismas claves, con los mismos marcadores `{x}` y plurales con `other`; que no haya texto en español escrito en el código; que cada `code` y `msgKey` del código tenga traducción; y que ningún formato fije un locale fuera de la tabla `LANGS`. `node scripts/i18n-check.js untranslated` lista lo que quedó igual al español (las excepciones por idioma están en `public/js/i18n/allowlist.json`).
 - **Base de datos existente:** `npm run db:migrate` aplica el `CHECK` de idiomas y las columnas nuevas de avisos sin borrar datos (se puede correr varias veces).
 
 ## Notas
