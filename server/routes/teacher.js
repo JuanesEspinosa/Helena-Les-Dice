@@ -247,6 +247,7 @@ async function teamActivity(teamId) {
   return rows.map((r) => ({
     id: r.id,
     user_name: r.user_name || 'Sistema',
+    is_system: !r.user_name, // el front traduce "Sistema"
     action: r.action,
     label: actionLabel(r.action),
     target: r.detail || r.section_name || '',

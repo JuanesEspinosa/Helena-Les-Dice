@@ -1,7 +1,8 @@
 // Vista 13 · Gestión de equipos: tabla del periodo y formulario crear / editar (RF-03)
 import { get, post, put } from '../core/api.js';
 import { initLayout, setMain } from '../core/layout.js';
-import { html, safe, icon, initials, emptyState, loading, toast, clearErrors, showError, withBusy, param } from '../core/ui.js';
+import { html, safe, icon, initials, emptyState, loading, toast, clearErrors, showError, withBusy, param, fmtPercent } from '../core/ui.js';
+import { t, tError } from '../core/i18n.js';
 
 /** Fragmento HTML ya escapado para anidar dentro de otra plantilla. */
 const h = (...args) => safe(html(...args));
@@ -24,8 +25,8 @@ await initLayout({ roles: ['docente'], active: 'equipos' });
 setMain(html`
   <div class="page-head">
     <div>
-      <h1 class="page-title">Equipos</h1>
-      <p class="page-sub">Crea los equipos del periodo y vincula a cada estudiante. Cada estudiante puede estar en un solo equipo por periodo.</p>
+      <h1 class="page-title">${t('menu.docente.equipos')}</h1>
+      <p class="page-sub">${t('teacher.teams.lead')}</p>
     </div>
   </div>
   <div class="split">
@@ -49,7 +50,7 @@ async function loadTeams() {
     if (!state.period && state.data.period) state.period = String(state.data.period.id);
     renderList();
   } catch (err) {
-    document.getElementById('list-card').innerHTML = emptyState('alert', 'No se pudieron cargar los equipos', err.message).value;
+    document.getElementById('list-card').innerHTML = emptyState('alert', t('teacher.teams.loadError'), err.message).value;
   }
 }
 
@@ -57,46 +58,46 @@ function renderList() {
   const { periods, period, teams, summary } = state.data;
   const card = document.getElementById('list-card');
   if (!period) {
-    card.innerHTML = emptyState('calendar', 'No hay periodos académicos', 'El administrador debe crear un periodo antes de formar equipos.').value;
+    card.innerHTML = emptyState('calendar', t('teacher.noPeriodsTitle'), t('teacher.noPeriodsText')).value;
     return;
   }
   card.innerHTML = html`
     <div class="card-head">
       <div class="stack" style="gap:4px">
-        <h2 id="lista" class="card-title" style="font-size:18px">Equipos del periodo ${period.name}</h2>
-        <span class="muted" style="font-weight:600">${summary.teams} equipos · ${summary.students} estudiantes · ${summary.without_team} sin equipo</span>
+        <h2 id="lista" class="card-title" style="font-size:18px">${t('teacher.panel.teamsOfPeriod', { name: period.name })}</h2>
+        <span class="muted" style="font-weight:600">${t('teacher.teams.summaryTeams', { count: summary.teams })} · ${t('teacher.panel.students', { count: summary.students })} · ${t('teacher.teams.summaryNoTeam', { count: summary.without_team })}</span>
       </div>
       <div class="filters">
-        <label class="sr-only" for="l-period">Ver periodo</label>
+        <label class="sr-only" for="l-period">${t('teacher.teams.viewPeriod')}</label>
         <select class="select" id="l-period">
-          ${periods.map((p) => h`<option value="${p.id}" ${p.id === period.id ? 'selected' : ''}>Periodo ${p.name}${p.active ? ' (activo)' : ''}</option>`)}
+          ${periods.map((p) => h`<option value="${p.id}" ${p.id === period.id ? 'selected' : ''}>${t(p.active ? 'teacher.periodActive' : 'teacher.periodN', { name: p.name })}</option>`)}
         </select>
       </div>
     </div>
-    ${teams.length === 0 ? emptyState('users', 'Todavía no hay equipos en este periodo', period.active ? 'Usa el formulario "Crear equipo" para formar el primero.' : 'Este periodo está cerrado.') : h`
+    ${teams.length === 0 ? emptyState('users', t('teacher.noTeamsInPeriod'), t(period.active ? 'teacher.teams.useForm' : 'teacher.teams.periodClosed')) : h`
     <div class="table-wrap">
       <table class="table" style="min-width:660px">
-        <thead><tr><th scope="col">Equipo</th><th scope="col">Integrantes</th><th scope="col">Nivel actual</th><th scope="col" class="actions">Acciones</th></tr></thead>
+        <thead><tr><th scope="col">${t('teacher.teams.team')}</th><th scope="col">${t('menu.estudiante.integrantes')}</th><th scope="col">${t('teacher.teams.currentLevel')}</th><th scope="col" class="actions">${t('common.actions')}</th></tr></thead>
         <tbody>${teams.map(teamRow)}</tbody>
       </table>
     </div>`}`;
 }
 
-function teamRow(t) {
-  const n = t.members.length;
+function teamRow(team) {
+  const n = team.members.length;
   return h`
     <tr>
-      <td><div style="font-weight:800;font-size:15px">${t.name}</div><div class="muted">${t.project || 'Sin proyecto definido'}</div></td>
-      <td>${n === 0 ? h`<span class="muted">Sin integrantes</span>` : h`
-        <div class="avatars" title="${t.members.map((m) => m.name).join(', ')}">
-          ${t.members.slice(0, 5).map((m) => h`<span class="avatar avatar-sm" aria-hidden="true">${initials(m.name)}</span>`)}
-          <span class="avatars__count">${n} ${n === 1 ? 'integrante' : 'integrantes'}</span>
+      <td><div style="font-weight:800;font-size:15px">${team.name}</div><div class="muted">${team.project || t('teacher.noProject')}</div></td>
+      <td>${n === 0 ? h`<span class="muted">${t('teacher.teams.noMembers')}</span>` : h`
+        <div class="avatars" title="${team.members.map((m) => m.name).join(', ')}">
+          ${team.members.slice(0, 5).map((m) => h`<span class="avatar avatar-sm" aria-hidden="true">${initials(m.name)}</span>`)}
+          <span class="avatars__count">${t('teacher.teams.memberCount', { count: n })}</span>
         </div>`}</td>
-      <td>${t.current ? `Nivel ${t.current.position} · ${t.current.name}` : 'Documento completo'}<div class="muted small">${t.pct}% aprobado</div></td>
+      <td>${team.current ? t('common.levelNamed', { n: team.current.position, name: team.current.name }) : t('teacher.teams.docComplete')}<div class="muted small">${t('teacher.teams.pctApproved', { pct: fmtPercent(team.pct) })}</div></td>
       <td class="actions">
         <div class="row" style="justify-content:flex-end;gap:6px;flex-wrap:nowrap">
-          <button type="button" class="btn btn-outline btn-sm" data-edit="${t.id}" ${t.period_active ? '' : safe('disabled title="El periodo está cerrado"')}>${icon('edit', 16)}Editar</button>
-          <a class="btn btn-ghost btn-sm" href="/docente/equipo.html?id=${t.id}">Ver avance</a>
+          <button type="button" class="btn btn-outline btn-sm" data-edit="${team.id}" ${team.period_active ? '' : safe(html`disabled title="${t('teacher.teams.periodClosedShort')}"`)}>${icon('edit', 16)}${t('common.edit')}</button>
+          <a class="btn btn-ghost btn-sm" href="/docente/equipo.html?id=${team.id}">${t('teacher.teams.seeProgress')}</a>
         </div>
       </td>
     </tr>`;
@@ -138,17 +139,17 @@ function resetForm() {
 }
 
 function startEdit(id) {
-  const t = state.data && state.data.teams.find((x) => x.id === id);
-  if (!t) {
-    toast('Ese equipo no está en el periodo que estás viendo.', 'error');
+  const team = state.data && state.data.teams.find((x) => x.id === id);
+  if (!team) {
+    toast(t('teacher.teams.notInPeriod'), 'error');
     renderForm();
     return;
   }
   resetForm();
   state.mode = 'edit';
-  state.team = t;
+  state.team = team;
   state.warnings = [];
-  t.members.forEach((m) => state.chips.set(m.id, { id: m.id, name: m.name, existing: true, contributions: m.contributions }));
+  team.members.forEach((m) => state.chips.set(m.id, { id: m.id, name: m.name, existing: true, contributions: m.contributions }));
   renderForm();
   focusForm();
 }
@@ -166,45 +167,45 @@ function renderForm() {
   const periods = activePeriods();
   card.classList.toggle('form-card--edit', editing);
   if (!editing && periods.length === 0) {
-    card.innerHTML = html`<h2 id="form-title" class="card-title" style="font-size:18px">Crear equipo</h2>
-      ${emptyState('calendar', 'No hay periodos activos', 'Solo se pueden crear equipos en un periodo académico activo.')}`;
+    card.innerHTML = html`<h2 id="form-title" class="card-title" style="font-size:18px">${t('teacher.createTeam')}</h2>
+      ${emptyState('calendar', t('teacher.teams.noActiveTitle'), t('teacher.teams.noActiveText'))}`;
     return;
   }
-  const t = state.team;
+  const team = state.team;
   card.innerHTML = html`
-    <h2 id="form-title" class="card-title" style="font-size:18px">${editing ? `Editar ${t.name}` : 'Crear equipo'}</h2>
+    <h2 id="form-title" class="card-title" style="font-size:18px">${editing ? t('teacher.teams.editTitle', { name: team.name }) : t('teacher.createTeam')}</h2>
     <form id="team-form" class="stack" style="gap:14px" novalidate>
       <div class="form-alert"></div>
       <div class="field">
-        <label class="label" for="f-name">Nombre del equipo</label>
-        <input class="input" id="f-name" name="name" maxlength="80" required value="${editing ? t.name : ''}" placeholder="Equipo 6" autocomplete="off">
+        <label class="label" for="f-name">${t('fields.teamName')}</label>
+        <input class="input" id="f-name" name="name" maxlength="80" required value="${editing ? team.name : ''}" placeholder="${t('teacher.teams.namePlaceholder')}" autocomplete="off">
       </div>
       <div class="field">
-        <label class="label" for="f-project">Proyecto</label>
-        <input class="input" id="f-project" name="project" maxlength="160" value="${editing ? t.project : ''}" placeholder="Nombre del proyecto del equipo" autocomplete="off">
+        <label class="label" for="f-project">${t('fields.project')}</label>
+        <input class="input" id="f-project" name="project" maxlength="160" value="${editing ? team.project : ''}" placeholder="${t('teacher.teams.projectPlaceholder')}" autocomplete="off">
       </div>
       <div class="field">
-        <label class="label" for="f-period">Periodo académico</label>
+        <label class="label" for="f-period">${t('teacher.academicPeriod')}</label>
         ${editing
-          ? h`<input class="input" id="f-period" value="${t.period_name}" readonly>`
+          ? h`<input class="input" id="f-period" value="${team.period_name}" readonly>`
           : h`<select class="select" id="f-period" name="period_id">
-              ${periods.map((p) => h`<option value="${p.id}" ${String(p.id) === state.period ? 'selected' : ''}>${p.name} (activo)</option>`)}
+              ${periods.map((p) => h`<option value="${p.id}" ${String(p.id) === state.period ? 'selected' : ''}>${t('teacher.teams.periodOptionActive', { name: p.name })}</option>`)}
             </select>`}
       </div>
       <div class="field">
-        <label class="label" for="f-search">Agregar estudiantes</label>
-        <div class="input-icon">${icon('search', 18)}<input class="input" id="f-search" name="student_ids" type="search" placeholder="Buscar por nombre o correo" autocomplete="off" aria-controls="results" aria-describedby="search-hint"></div>
-        <span class="hint" id="search-hint">Escribe al menos dos letras.</span>
+        <label class="label" for="f-search">${t('teacher.teams.addStudents')}</label>
+        <div class="input-icon">${icon('search', 18)}<input class="input" id="f-search" name="student_ids" type="search" placeholder="${t('teacher.teams.searchPlaceholder')}" autocomplete="off" aria-controls="results" aria-describedby="search-hint"></div>
+        <span class="hint" id="search-hint">${t('teacher.teams.searchHint')}</span>
       </div>
       <div id="results" aria-live="polite"></div>
       <div class="stack" style="gap:6px">
-        <span class="label" id="chips-label">Integrantes (${memberCount()})</span>
+        <span class="label" id="chips-label">${t('teacher.teams.membersCount', { count: memberCount() })}</span>
         <div class="chips" id="chips">${chipsHtml()}</div>
       </div>
       <div id="warnings" class="stack" style="gap:8px">${warningsHtml()}</div>
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary" style="flex:1 1 auto;min-height:48px">${editing ? 'Guardar cambios' : 'Crear equipo'}</button>
-        ${editing ? h`<button type="button" class="btn btn-outline" id="cancel-edit" style="min-height:48px">Cancelar</button>` : ''}
+        <button type="submit" class="btn btn-primary" style="flex:1 1 auto;min-height:48px">${editing ? t('common.saveChanges') : t('teacher.createTeam')}</button>
+        ${editing ? h`<button type="button" class="btn btn-outline" id="cancel-edit" style="min-height:48px">${t('common.cancel')}</button>` : ''}
       </div>
     </form>`;
 }
@@ -213,10 +214,10 @@ function memberCount() { return [...state.chips.keys()].filter((id) => !state.re
 
 function chipsHtml() {
   const list = [...state.chips.values()].filter((c) => !state.removed.has(c.id));
-  if (list.length === 0) return h`<span class="muted small">Todavía no agregas estudiantes.</span>`;
+  if (list.length === 0) return h`<span class="muted small">${t('teacher.teams.noStudentsAdded')}</span>`;
   return h`${list.map((c) => h`
     <span class="chip ${c.existing ? '' : 'chip--new'}">${c.name}
-      <button type="button" data-remove="${c.id}" aria-label="Quitar a ${c.name}">${icon('x', 16)}</button>
+      <button type="button" data-remove="${c.id}" aria-label="${t('teacher.teams.removeNamed', { name: c.name })}">${icon('x', 16)}</button>
     </span>`)}`;
 }
 
@@ -228,7 +229,7 @@ function warningsHtml() {
 function renderResults() {
   const box = document.getElementById('results');
   if (!box) return;
-  if (state.results === null) { box.innerHTML = html`<p class="muted small">Buscando…</p>`; return; }
+  if (state.results === null) { box.innerHTML = html`<p class="muted small">${t('teacher.teams.searching')}</p>`; return; }
   if (state.results.length === 0) { box.innerHTML = ''; return; }
   const ownTeam = state.mode === 'edit' ? state.team.id : null;
   box.innerHTML = html`<div class="results">${state.results.map((s) => {
@@ -236,8 +237,8 @@ function renderResults() {
     const elsewhere = s.team_id && s.team_id !== ownTeam;
     return h`
       <div class="result">
-        <div class="result__text"><span style="font-weight:700">${s.name}</span><span class="muted small">${elsewhere ? `En el ${s.team_name}` : s.email}</span></div>
-        <button type="button" class="btn btn-sm ${added ? 'btn-ghost' : 'btn-outline'}" data-add="${s.id}" ${added ? 'disabled' : ''}>${added ? 'Agregado' : 'Agregar'}</button>
+        <div class="result__text"><span style="font-weight:700">${s.name}</span><span class="muted small">${elsewhere ? t('teacher.teams.inTeam', { team: s.team_name }) : s.email}</span></div>
+        <button type="button" class="btn btn-sm ${added ? 'btn-ghost' : 'btn-outline'}" data-add="${s.id}" ${added ? 'disabled' : ''}>${t(added ? 'teacher.teams.added' : 'teacher.teams.add')}</button>
       </div>`;
   })}</div>`;
 }
@@ -258,7 +259,7 @@ async function search(q) {
 
 function refreshChips() {
   document.getElementById('chips').innerHTML = chipsHtml().value;
-  document.getElementById('chips-label').textContent = `Integrantes (${memberCount()})`;
+  document.getElementById('chips-label').textContent = t('teacher.teams.membersCount', { count: memberCount() });
   renderResults();
 }
 
@@ -268,7 +269,7 @@ function addStudent(id) {
   const ownTeam = state.mode === 'edit' ? state.team.id : null;
   if (s.team_id && s.team_id !== ownTeam) {
     const periodName = state.mode === 'edit' ? state.team.period_name : (activePeriods().find((p) => p.id === formPeriodId()) || {}).name;
-    state.warnings = [`${s.name} ya pertenece al ${s.team_name} en el periodo ${periodName}. No se agregó.`];
+    state.warnings = [t('errors.STUDENT_IN_OTHER_TEAM', { name: s.name, team: s.team_name, period: periodName })];
     document.getElementById('warnings').innerHTML = warningsHtml().value;
     return;
   }
@@ -282,7 +283,7 @@ async function removeStudent(id) {
   if (!c) return;
   if (c.existing) {
     if (c.contributions > 0) {
-      state.warnings = [`${c.name} ya tiene ${c.contributions} aporte(s) en el equipo y no se puede quitar.`];
+      state.warnings = [t('errors.MEMBER_HAS_CONTRIBUTIONS', { name: c.name, count: c.contributions })];
       document.getElementById('warnings').innerHTML = warningsHtml().value;
       return;
     }
@@ -328,7 +329,7 @@ async function onSubmit(e) {
   clearErrors(form);
   form.querySelector('.form-alert').innerHTML = '';
   const name = form.querySelector('[name="name"]').value.trim();
-  if (!name) { showError(form, { field: 'name', message: 'El nombre del equipo es obligatorio.' }); return; }
+  if (!name) { showError(form, { field: 'name', message: t('teacher.teams.nameRequired') }); return; }
   const project = form.querySelector('[name="project"]').value.trim();
   const ids = [...state.chips.keys()].filter((id) => !state.removed.has(id));
   try {
@@ -336,13 +337,13 @@ async function onSubmit(e) {
     if (state.mode === 'edit') {
       const add = ids.filter((id) => !state.chips.get(id).existing);
       result = await withBusy(button, () => put(`/teacher/teams/${state.team.id}`, { name, project, add_ids: add, remove_ids: [...state.removed] }));
-      toast(`Se guardaron los cambios de ${result.team.name}.`);
+      toast(t('teacher.teams.saved', { name: result.team.name }));
     } else {
       const periodId = Number(form.querySelector('[name="period_id"]').value);
       result = await withBusy(button, () => post('/teacher/teams', { name, project, period_id: periodId, student_ids: ids }));
-      toast(`Se creó el ${result.team.name} con ${result.added.length} integrante(s).`);
+      toast(t('teacher.teams.created', { name: result.team.name, count: result.added.length }));
     }
-    state.warnings = (result.skipped || []).map((s) => s.message);
+    state.warnings = (result.skipped || []).map(tError);
     resetForm();
     history.replaceState(null, '', location.pathname);
     await loadTeams();

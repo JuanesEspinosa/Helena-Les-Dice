@@ -24,7 +24,10 @@
     "plusPoints": {
       "one": "+{count} punto",
       "other": "+{count} puntos"
-    }
+    },
+    "actions": "Acciones",
+    "edit": "Editar",
+    "saveChanges": "Guardar cambios"
   },
   "lang": {
     "label": "Idioma"

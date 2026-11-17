@@ -25,12 +25,21 @@
     "PASSWORD_NO_DIGIT": "The password must contain at least one number.",
     "PASSWORD_LONG": "The password is too long.",
     "PASSWORD_MISMATCH": "The passwords do not match.",
-    "SAME_PERSON": "The author and the reviewer cannot be the same person."
+    "SAME_PERSON": "The author and the reviewer cannot be the same person.",
+    "STUDENT_IN_OTHER_TEAM": "{name} already belongs to {team} in term {period}. They were not added.",
+    "MEMBER_HAS_CONTRIBUTIONS": "{name} already has contributions in the team ({count}) and cannot be removed.",
+    "POINTS_INVALID": "Points must be a whole number between 0 and {max}."
   },
   "fields": {
     "generic": "Field",
     "email": "Email",
     "password": "Password",
-    "token": "Link"
+    "token": "Link",
+    "description": "Description",
+    "levelName": "Level name",
+    "position": "Order",
+    "project": "Project",
+    "sectionName": "Section name",
+    "teamName": "Team name"
   }
 }
