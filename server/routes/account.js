@@ -9,7 +9,7 @@ const { studentTeam } = require('../services/teams');
 
 const router = express.Router();
 
-const LANGS = ['es', 'en'];
+const LANGS = ['es', 'en', 'pt', 'fr', 'de', 'it'];
 const NOTIFICATIONS_LIMIT = 100;
 const BCRYPT_ROUNDS = 10;
 
@@ -58,7 +58,7 @@ router.post('/password', ah(async (req, res) => {
 // ---------- Idioma de la interfaz ----------
 router.patch('/lang', ah(async (req, res) => {
   const { lang } = req.body;
-  if (!LANGS.includes(lang)) throw new HttpError(400, 'El idioma debe ser "es" o "en".', 'lang');
+  if (!LANGS.includes(lang)) throw new HttpError(400, 'El idioma debe ser "es", "en", "pt", "fr", "de" o "it".', 'lang', { code: 'LANG_INVALID' });
   await query('UPDATE users SET lang = $1 WHERE id = $2', [lang, req.session.user.id]);
   req.session.user = { ...req.session.user, lang };
   await saveSession(req);

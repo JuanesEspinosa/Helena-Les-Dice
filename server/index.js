@@ -88,6 +88,8 @@ app.use((err, _req, res, _next) => {
   res.status(status).json({
     error: status >= 500 ? 'Ocurrió un error en el servidor. Intenta de nuevo.' : err.message,
     field: err.field,
+    code: status >= 500 ? 'SERVER_ERROR' : err.code,
+    params: status >= 500 ? undefined : err.params,
   });
 });
 

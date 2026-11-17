@@ -5,11 +5,14 @@ class HttpError extends Error {
    * @param {number} status código HTTP
    * @param {string} message mensaje claro para el usuario
    * @param {string} [field] campo del formulario que falló (el front lo marca en rojo)
+   * @param {{ code?: string, params?: object }} [extra] código estable (el front traduce por él) y datos variables
    */
-  constructor(status, message, field) {
+  constructor(status, message, field, { code, params } = {}) {
     super(message);
     this.status = status;
     this.field = field;
+    this.code = code;
+    this.params = params;
   }
 }
 

@@ -4,7 +4,8 @@ const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { startApp, client } = require('./helpers');
+const { Client } = require('pg');
+const { startApp, client, testDatabaseUrl } = require('./helpers');
 
 const ADMIN = 'admin@elpoli.edu.co';
 const TEACHER = 'gladys.restrepo@elpoli.edu.co';
@@ -243,4 +244,38 @@ test('reordenar niveles guarda el nuevo orden y rechaza órdenes incompletos', a
 
   // Restaura el orden original
   assert.equal((await teacher.put('/api/teacher/levels/order', { ids })).status, 200);
+});
+
+// ---------- Idioma de la interfaz ----------
+
+test('el usuario puede elegir cualquiera de los 6 idiomas y /auth/me lo devuelve', async () => {
+  for (const lang of ['es', 'en', 'pt', 'fr', 'de', 'it']) {
+    const r = await teacher.patch('/api/account/lang', { lang });
+    assert.equal(r.status, 200, `${lang}: ${JSON.stringify(r.data)}`);
+    assert.deepEqual(r.data, { lang });
+    assert.equal((await teacher.get('/api/auth/me')).data.user.lang, lang);
+  }
+  assert.equal((await teacher.patch('/api/account/lang', { lang: 'es' })).status, 200);
+});
+
+test('un idioma fuera de los 6 se rechaza con 400 y el código LANG_INVALID', async () => {
+  for (const lang of ['xx', 'EN', 'pt-BR', '', 5]) {
+    const r = await teacher.patch('/api/account/lang', { lang });
+    assert.equal(r.status, 400, `lang=${JSON.stringify(lang)}`);
+    assert.equal(r.data.field, 'lang');
+    assert.equal(r.data.code, 'LANG_INVALID');
+  }
+});
+
+test('la BD rechaza un idioma inválido escrito directamente (CHECK)', async () => {
+  const db = new Client({ connectionString: testDatabaseUrl() });
+  await db.connect();
+  try {
+    await assert.rejects(
+      db.query("UPDATE users SET lang = 'xx' WHERE email = $1", [TEACHER]),
+      (err) => err.code === '23514'
+    );
+  } finally {
+    await db.end();
+  }
 });
