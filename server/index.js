@@ -88,8 +88,9 @@ app.use((err, _req, res, _next) => {
   res.status(status).json({
     error: status >= 500 ? 'Ocurrió un error en el servidor. Intenta de nuevo.' : err.message,
     field: err.field,
-    code: status >= 500 ? 'SERVER_ERROR' : err.code,
-    params: status >= 500 ? undefined : err.params,
+    // Solo los HttpError llevan un código del catálogo; otros errores (de librerías) no exponen el suyo
+    code: status >= 500 ? 'SERVER_ERROR' : (err instanceof HttpError ? err.code : undefined),
+    params: status >= 500 || !(err instanceof HttpError) ? undefined : err.params,
   });
 });
 

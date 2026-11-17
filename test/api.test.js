@@ -4,6 +4,7 @@ const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 const { Client } = require('pg');
 const { startApp, client, testDatabaseUrl } = require('./helpers');
 
@@ -172,8 +173,26 @@ test('tras aprobar una sección, el aviso más reciente del responsable trae msg
   const r = await student.get('/api/account/notifications');
   assert.equal(r.status, 200);
   const latest = r.data.notifications[0];
-  assert.ok(latest.msg_key, `msg_key vacío: ${JSON.stringify(latest)}`);
-  assert.ok(Object.values(latest.params).includes(flowSection.name), JSON.stringify(latest.params));
+  // La docente aprobó sin observación: el aviso es "revision.approved" con la sección y quien revisó
+  assert.equal(latest.msg_key, 'revision.approved', JSON.stringify(latest));
+  assert.equal(latest.params.section, flowSection.name);
+  assert.equal(typeof latest.params.reviewer, 'string');
+});
+
+test('db:migrate se puede correr dos veces seguidas y deja el CHECK con los 6 idiomas', async () => {
+  const env = { ...process.env, DATABASE_URL: testDatabaseUrl() };
+  for (const run of [1, 2]) {
+    const r = spawnSync(process.execPath, [path.join(__dirname, '..', 'db', 'migrate.js')], { env, encoding: 'utf8' });
+    assert.equal(r.status, 0, `corrida ${run}: ${r.stdout}${r.stderr}`);
+  }
+  const db = new Client({ connectionString: testDatabaseUrl() });
+  await db.connect();
+  try {
+    const { rows } = await db.query("SELECT pg_get_constraintdef(oid) AS def FROM pg_constraint WHERE conname = 'users_lang_check'");
+    for (const lang of ['es', 'en', 'pt', 'fr', 'de', 'it']) assert.match(rows[0].def, new RegExp(`'${lang}'`));
+  } finally {
+    await db.end();
+  }
 });
 
 test('un estudiante que no es responsable no puede editar la sección', async () => {
