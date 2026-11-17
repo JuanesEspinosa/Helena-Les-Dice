@@ -96,3 +96,19 @@ test('un plural elige la forma según count y el idioma, y "zero" solo cuando ex
   assert.equal(i18n.t('student.editor.words', { count: 3 }), '3 words');
   assert.equal(i18n.t('admin.achievements.wonBy', { count: 0 }), 'earned by no team yet');
 });
+
+test('fechas y números salen en el formato del idioma activo, no fijos en es-CO', async () => {
+  globalThis.document = fakeDocument([]);
+  globalThis.fetch = servingFetch;
+  const date = new Date(2026, 2, 5, 14, 30); // 5 de marzo de 2026, 14:30 (hora local)
+
+  await i18n.initI18n('de');
+  const de = { date: i18n.fmtDate(date), number: i18n.fmtNumber(1234.5) };
+  await i18n.initI18n('en');
+  const en = { date: i18n.fmtDate(date), number: i18n.fmtNumber(1234.5) };
+
+  assert.equal(de.date, '5. März 2026');
+  assert.equal(de.number, '1.234,5');
+  assert.equal(en.date, 'Mar 5, 2026');
+  assert.equal(en.number, '1,234.5');
+});

@@ -3,7 +3,9 @@
 //   node scripts/i18n-check.js keys                 mismo juego de claves en los 6 idiomas
 //   node scripts/i18n-check.js literals [archivos…] ningún texto en español escrito en el código
 //   node scripts/i18n-check.js untranslated         pt/fr/de/it no repiten el valor de es
-//   node scripts/i18n-check.js                      keys + literals sobre todo public/
+//   node scripts/i18n-check.js codes                todo code/msgKey del código tiene traducción
+//   node scripts/i18n-check.js locales              ningún locale fijo fuera de core/i18n.js
+//   node scripts/i18n-check.js                      keys + literals (todo public/) + codes + locales
 // Sale con 1 y lista los fallos.
 const fs = require('fs');
 const path = require('path');
@@ -57,19 +59,42 @@ function loadLang(lang) {
   return out;
 }
 
+const own = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
+const placeholders = (value) => [...new Set(
+  (isPlural(value) ? Object.values(value) : [value]).flatMap((s) => [...String(s).matchAll(/\{(\w+)\}/g)].map((m) => m[1]))
+)].sort().join(',');
+
+/** Diferencias de forma con el español: marcadores {x} distintos, o plural sin "other" o donde no toca. */
+function shapeProblems(baseValue, value) {
+  const problems = [];
+  if (isPlural(baseValue) !== isPlural(value)) problems.push(isPlural(baseValue) ? 'debería ser plural' : 'no debería ser plural');
+  else if (isPlural(value) && !own(value, 'other')) problems.push('plural sin "other"');
+  if (placeholders(baseValue) !== placeholders(value)) {
+    problems.push(`marcadores {${placeholders(value)}} en vez de {${placeholders(baseValue)}}`);
+  }
+  return problems;
+}
+
 function checkKeys({ quiet = false } = {}) {
   const base = loadLang(BASE);
   const baseKeys = Object.keys(base);
-  let failed = false;
+  let failed = Object.entries(base).some(([k, v]) => {
+    const bad = isPlural(v) && !own(v, 'other');
+    if (bad) console.log(`FAIL es\n  ${k}: plural sin "other"`);
+    return bad;
+  });
   for (const lang of LANGS.filter((l) => l !== BASE)) {
     const dict = loadLang(lang);
-    const missing = baseKeys.filter((k) => !(k in dict));
-    const extra = Object.keys(dict).filter((k) => !(k in base));
-    if (missing.length || extra.length) {
+    const missing = baseKeys.filter((k) => !own(dict, k));
+    const extra = Object.keys(dict).filter((k) => !own(base, k));
+    const shapes = baseKeys.filter((k) => own(dict, k))
+      .flatMap((k) => shapeProblems(base[k], dict[k]).map((p) => `${k}: ${p}`));
+    if (missing.length || extra.length || shapes.length) {
       failed = true;
       console.log(`FAIL ${lang}`);
       missing.forEach((k) => console.log(`  falta: ${k}`));
       extra.forEach((k) => console.log(`  sobra: ${k}`));
+      shapes.forEach((s) => console.log(`  forma: ${s}`));
     } else if (!quiet) {
       console.log(`OK ${lang} (${baseKeys.length} claves)`);
     }
@@ -236,11 +261,66 @@ function publicFiles(dir = PUBLIC) {
   });
 }
 
+// ---------- Códigos del servidor y locales fijos ----------
+
+const SERVER = path.join(ROOT, 'server');
+const CORE_I18N = path.join(PUBLIC, 'js', 'core', 'i18n.js');
+const jsFiles = (dir) => fs.readdirSync(dir).flatMap((f) => {
+  const full = path.join(dir, f);
+  if (fs.statSync(full).isDirectory()) return full === I18N ? [] : jsFiles(full);
+  return f.endsWith('.js') ? [full] : [];
+});
+const rel = (file) => path.relative(ROOT, file);
+
+/**
+ * Todo `code: 'X'` del servidor y del front tiene errors.X, y todo msgKey del servidor tiene
+ * notif.<msgKey>.title y .body. Si faltara, el front caería en silencio al español del servidor.
+ */
+function checkCodes() {
+  const base = loadLang(BASE);
+  const failures = [];
+  for (const file of [...jsFiles(SERVER), ...jsFiles(path.join(PUBLIC, 'js'))]) {
+    fs.readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
+      for (const m of line.matchAll(/\bcode: '([A-Z_]+)'/g)) {
+        if (!own(base, `errors.${m[1]}`)) failures.push(`${rel(file)}:${i + 1}: errors.${m[1]}`);
+      }
+      if (!/\bmsgKey:/.test(line)) return;
+      for (const m of line.matchAll(/'([a-z]+\.[a-zA-Z]+)'/g)) {
+        ['title', 'body'].filter((part) => !own(base, `notif.${m[1]}.${part}`))
+          .forEach((part) => failures.push(`${rel(file)}:${i + 1}: notif.${m[1]}.${part}`));
+      }
+    });
+  }
+  failures.forEach((f) => console.log(`  sin traducción: ${f}`));
+  console.log(failures.length ? `codes FAIL (${failures.length})` : 'codes OK (0)');
+  return failures.length > 0;
+}
+
+/**
+ * Ningún archivo del front fija un locale ('es-CO', "en-US"…). La única excepción son las entradas
+ * `locale: "…"` de la tabla LANGS en core/i18n.js; un formato de ese mismo archivo no se libra.
+ */
+function checkLocales() {
+  const failures = [];
+  for (const file of jsFiles(path.join(PUBLIC, 'js'))) {
+    fs.readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
+      for (const m of line.matchAll(/(locale:\s*)?['"`]([a-z]{2}-[A-Z]{2})['"`]/g)) {
+        if (!(file === CORE_I18N && m[1])) failures.push(`${rel(file)}:${i + 1}: ${m[2]}`);
+      }
+    });
+  }
+  failures.forEach((f) => console.log(`  locale fijo: ${f}`));
+  console.log(failures.length ? `locales FAIL (${failures.length})` : 'locales OK (0)');
+  return failures.length > 0;
+}
+
 // ---------- CLI ----------
 
 function main([cmd, ...args]) {
   if (cmd === 'keys') return checkKeys().failed ? 1 : 0;
   if (cmd === 'untranslated') return checkUntranslated() ? 1 : 0;
+  if (cmd === 'codes') return checkCodes() ? 1 : 0;
+  if (cmd === 'locales') return checkLocales() ? 1 : 0;
   if (cmd === 'literals') {
     if (!args.length) { console.log('Uso: i18n-check.js literals <archivos…>'); return 1; }
     const n = checkLiterals(args);
@@ -252,7 +332,9 @@ function main([cmd, ...args]) {
     console.log(keys.failed ? 'keys FAIL' : `keys OK (${LANGS.length} idiomas, ${keys.count} claves)`);
     const n = checkLiterals(publicFiles());
     console.log(n ? `literals FAIL (${n})` : 'literals OK (0)');
-    return keys.failed || n ? 1 : 0;
+    const codesFailed = checkCodes();
+    const localesFailed = checkLocales();
+    return keys.failed || n || codesFailed || localesFailed ? 1 : 0;
   }
   console.log(`Subcomando desconocido: ${cmd}`);
   return 1;
