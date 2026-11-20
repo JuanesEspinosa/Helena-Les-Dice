@@ -67,6 +67,29 @@ test('cinco intentos fallidos bloquean la cuenta (423)', async () => {
   assert.equal(blocked.status, 423, 'con la cuenta bloqueada ni la contraseña correcta entra');
 });
 
+test('un correo inexistente y uno existente con contraseña errónea reciben la misma respuesta', async () => {
+  const missing = await client(app.base).login('no.existe.1@elpoli.edu.co', 'mala');
+  const existing = await client(app.base).login('felipe.osorio@elpoli.edu.co', 'mala');
+  assert.equal(missing.status, 401);
+  assert.deepEqual({ status: missing.status, data: missing.data }, { status: existing.status, data: existing.data });
+  assert.deepEqual(missing.data.params, { remaining: 4, lockMinutes: 10 });
+});
+
+test('cinco intentos fallidos con un correo inexistente también terminan en bloqueo (423)', async () => {
+  const c = client(app.base);
+  const statuses = [];
+  for (let i = 0; i < 5; i++) statuses.push((await c.login('no.existe.2@elpoli.edu.co', 'mala')).status);
+  assert.deepEqual(statuses, [401, 401, 401, 401, 423]);
+});
+
+test('un usuario inactivo recibe la misma respuesta que uno activo con contraseña errónea', async () => {
+  // paula.giraldo es la estudiante inactiva de la semilla; aquí se usa su contraseña correcta
+  const inactive = await client(app.base).login('paula.giraldo@elpoli.edu.co');
+  const active = await client(app.base).login('tomas.arango@elpoli.edu.co', 'mala');
+  assert.equal(inactive.status, 401);
+  assert.deepEqual({ status: inactive.status, data: inactive.data }, { status: active.status, data: active.data });
+});
+
 test('/auth/me devuelve el rol de cada usuario', async () => {
   assert.equal((await admin.get('/api/auth/me')).data.user.role, 'administrador');
   assert.equal((await teacher.get('/api/auth/me')).data.user.role, 'docente');
